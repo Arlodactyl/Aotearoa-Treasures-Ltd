@@ -6,6 +6,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <stdexcept> // For runtime_error
 using namespace std;
 
 struct User
@@ -160,9 +161,13 @@ int main()
 
 void saveAllUsers(const vector<User>& users) // Function for saving all users inside the file
 {
-    ofstream file("Users.txt"); // Output File 
-    if (file.is_open()) // Checking if the file has opened
-    {
+    try {
+        ofstream file("Users.txt"); // Output File 
+        if (!file.is_open()) // Checking if the file has opened
+        {
+            throw runtime_error("Failed to open Users.txt for writing.");
+        }
+
         for (const auto& user : users) // Using a auto for loop to save all the data in the user to the file
         {
             user.saveToFile(file);
@@ -170,25 +175,34 @@ void saveAllUsers(const vector<User>& users) // Function for saving all users in
 
         file.close(); // Closing the file
     }
+    catch (const exception& e) {
+        cerr << "\n(Error) Could not save users: " << e.what() << endl;
+    }
 }
 
 void loadAllUsers(vector<User>& users) // Funciton for loading all the users information from the file
 {
-    ifstream file("Users.txt"); // Input File 
-    {
-        if (file.is_open()) // Checking if the file has opened
+    try {
+        ifstream file("Users.txt"); // Input File 
+        if (!file.is_open()) // Checking if the file has opened
         {
-            string line; // Using a string variales to gather the information
-            while (getline(file, line))
+            throw runtime_error("Failed to open Users.txt for reading.");
+        }
+
+        string line; // Using a string variales to gather the information
+        while (getline(file, line))
+        {
+            User user;
+            if (user.loadFromLine(line)) // Checking if sussceful in getting the information
             {
-                User user;
-                if (user.loadFromLine(line)) // Checking if sussceful in getting the information
-                {
-                    users.push_back(user); // Pushing back the users information into the vector
-                }
+                users.push_back(user); // Pushing back the users information into the vector
             }
         }
+
         file.close(); // Closing the file
+    }
+    catch (const exception& e) {
+        cerr << "\n(Error) Could not load users: " << e.what() << endl;
     }
 }
 
@@ -414,3 +428,4 @@ void userLogin(vector<User>& users) // User Login Menu
     } while (option != '3'); // Keep loop while option doesn't equal 3 (3. Go back)
 
 }
+

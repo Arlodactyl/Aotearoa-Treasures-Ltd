@@ -6,643 +6,644 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
-#include <stdexcept> // For runtime_error
+#include <limits>      // For numeric_limits
+#include <iomanip>     // For setw, left alignment
+#include <stdexcept>   // For runtime_error
 using namespace std;
 
-struct Product // Structure Product to hold individuals products with details
+// Structure Product: holds individual product details
+struct Product
 {
-public: // Public Variables
-
-    string productName; // Variable for name of product
-    double price; // User's won't be getting charged, only cosmetic 
-    int quantity; // Variable for quantity available in stock
+    string productName; // Name of the product
+    double price;       // Price (cosmetic)
+    int quantity;       // Quantity in stock
 };
 
-struct Store // Strucutre Store to hold store information
+// Structure Store: holds store location and its product list
+struct Store
 {
-public: // Public Variables
+    string storeLocation;      // Store location name
+    vector<Product> products;  // List of products
 
-    string storeLocation; // Variable for Store Location
-    vector<Product> products; // Varible for list of products 
-
-    bool loadProcutsFromFile(const string& filename) // Loads prudocts from a given file into the store's prodcut list
+    // Loads products from a given file (CSV: name,price,quantity)
+    bool loadProcutsFromFile(const string& filename)
     {
-        // Could have a try catch block...
-        ifstream file(filename); // Checking if failed to open file
+        ifstream file(filename);
         if (!file.is_open())
         {
-            cout << "(Error) Failed to open " << filename << ".txt for reading" << endl;
+            cout << "(Error) Failed to open " << filename << " for reading" << endl;
             return false;
         }
-
-        string line; // Varaible to store each line from the file
-        while (getline(file, line)) // Reading line by line
+        string line;
+        while (getline(file, line))
         {
-            stringstream ss(line); // Creating a string stream from the line
-            string productName, priceStr, quantityStr; // Temporary variables
-
-            if (getline(ss, productName, ',') && getline(ss, priceStr, ',') && getline(ss, quantityStr))
+            stringstream ss(line);
+            string name, priceStr, qtyStr;
+            // Parse CSV line
+            if (getline(ss, name, ',') && getline(ss, priceStr, ',') && getline(ss, qtyStr))
             {
-                Product product; // Creating a new Product object
-                product.productName = productName; // Assigning product name
-                product.price = atof(priceStr.c_str()); // Converting price from string to a double value
-                product.quantity = atoi(quantityStr.c_str()); // Converting quantity fro string to a integer
-
-                products.push_back(product); // Adding the product to the store'ss product list
+                Product p;
+                p.productName = name;                   // Assign product name
+                p.price = atof(priceStr.c_str()); // Convert string to double
+                p.quantity = atoi(qtyStr.c_str());   // Convert string to int
+                products.push_back(p);                  // Add to vector
             }
         }
-
-        file.close(); // Closing the file
+        file.close(); // Close file when done
         return true;
     }
 
-    void displayProducts() const // Function for displaying the store's products list 
+    // Displays the list of products in the store
+    void displayProducts() const
     {
-        cout << "Products in " + storeLocation << endl;
-        for (const auto& product : products) // Looping throguh all products in the list
+        cout << "Products in " << storeLocation << endl;
+        for (const auto& p : products)
         {
-            cout << product.productName << " | $:" << product.price << " | Stock : " << product.quantity << endl;
+            cout << p.productName << " | $:" << p.price
+                << " | Stock: " << p.quantity << endl;
         }
     }
 };
 
+// Structure User: holds customer account information
 struct User
 {
-protected: // Private Variables
+protected:
     string username;
     string password;
-
-public: // Public Variables
+public:
     string name;
     string surname;
     int age;
 
-    // Cart here...?
+    // Default constructor initializes empty fields
+    User() : username(""), password(""), name(""), surname(""), age(0) {}
 
-    User() // Default constructor to initialize values
+    // Prompts for and validates password (cannot match username)
+    void setUpPassword()
     {
-        username = " ";
-        password = " ";
-        name = " ";
-        surname = " ";
-        age = 0;
-    }
-
-    void setUpPassword() // Function to set Username and Passowrd 
-    {
-        cout << "Enter A Password : ";
-        getline(cin, password); // Getting user input for Password
-        cout << endl;
-
-        // Error Handling (Password can't be the same as the username)
+        cout << "Enter a Password: ";
+        getline(cin, password);
         while (password == username)
         {
-            cout << "\n(Error Message) Please enter a password that doesn't match your Username!\n" << endl;
-
-            cout << "Enter A Password : ";
+            cout << "(Error) Password cannot match username." << endl;
+            cout << "Enter a Password: ";
             getline(cin, password);
-            cout << endl;
         }
-
+        cout << endl;
     }
 
-    void getInformation() // Funciton for getting the users information
+    // Prompts for and validates personal details
+    void getInformation()
     {
-        // Getting Name of User
-        cout << "Name : ";
-        getline(cin, name);
-        cout << endl;
-        // Getting Surname of User
-        cout << "Surname : ";
-        getline(cin, surname);
-        cout << endl;
-        //Getting Age of User
-        cout << "Age : ";
-
-        while (true) // auto while loop
+        cout << "Name: "; getline(cin, name);
+        cout << "Surname: "; getline(cin, surname);
+        cout << "Age: ";
+        while (true)
         {
-            cin >> age; // user input
-            cout << endl;
-
-            if (cin.fail() || age < 5 || age > 120) // if statement, checking for invalid input with .fail(), checking if age is less then 5 or greather then 120
+            cin >> age;
+            if (cin.fail() || age < 5 || age > 120)
             {
-                cin.clear(); // clearing the invalid input value 
-                cin.ignore(numeric_limits<streamsize>::max(), '\n'); // ingoring the invalid input, which prevents infinite loops   
-                cout << "Invlaid input, please enter a valid number : "; // Error Message
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cout << "Invalid. Enter age between 5 and 120: ";
             }
             else
             {
-                break; // Valid inpit, existing loop
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                break;
             }
         }
-
+        cout << endl;
     }
 
-    void setUsername(string& tempUsername) // Function for setting the users username 
+    void setUsername(const string& u) { username = u; }
+    string getUsername() const { return username; }
+    bool checkPassword(const string& p) const { return p == password; }
+
+    // Saves user data to a CSV file
+    void saveToFile(ofstream& f) const
     {
-        username = tempUsername;
+        f << username << ',' << password << ','
+            << name << ',' << surname << ',' << age << '\n';
     }
 
-    string getUsername() const // Function for returning a const value of users username 
+    // Loads user data from a CSV line
+    bool loadFromLine(const string& line)
     {
-        return username;
-    }
-
-    bool checkPassword(string& tempPassword) // Function for returning a bool value to check if the password is correct or not
-    {
-        return tempPassword == password;
-    }
-
-    void saveToFile(ofstream& file) const // Function for saving the information in the file
-    {
-        file << username << ',' << password << ',' << name << ',' << surname << ',' << age << endl;
-    }
-
-    bool loadFromLine(string& line) // Function for loading users data from a file
-    {
-        stringstream ss(line); // Stringstream to break the line into parts
-        string username, password, name, surname, stringAge; // Temp variables
-
-        getline(ss, username, ','); // Extracting Username
-        getline(ss, password, ','); // Extracting Password
-        getline(ss, name, ','); // Extracting Name
-        getline(ss, surname, ','); // Extracting Surname
-        getline(ss, stringAge); // Extracting Age (Still in a string)
-        int age = stoi(stringAge); // stoi (String to integer), this function converts a string into a integer
-
-        // Assigning the values to the member variable of the user
-        this->username = username;
-        this->password = password;
-        this->name = name;
-        this->surname = surname;
-        this->age = age;
-
+        stringstream ss(line);
+        string usr, pwd, nm, sn, ag;
+        if (!getline(ss, usr, ',') || !getline(ss, pwd, ',') ||
+            !getline(ss, nm, ',') || !getline(ss, sn, ',') ||
+            !getline(ss, ag))
+            return false;
+        username = usr;
+        password = pwd;
+        name = nm;
+        surname = sn;
+        age = stoi(ag);
         return true;
     }
-
 };
 
+// Function prototypes for clarity
 void createStoreFiles();
-bool fileExists(const string& filename);
-void loadAllStores(vector<Store>& Stores);
+bool fileExists(const string& fn);
+void loadAllStores(vector<Store>& stores);
 void saveAllUsers(const vector<User>& users);
 void loadAllUsers(vector<User>& users);
-
-bool usernameExists(const vector<User>& users, const string& username);
-
-void mainMenu(vector<User>& users, vector<Store>& stores); // Main Menu Function
-bool userMenu(vector<User>& users, vector<Store>& stores, bool& checkUserLogin);
-void adminMenu(vector<User>& users); // Admin Menu - Add store later....
-void userLogin(vector<User>& users, bool& checkUserLogin); // User Login Menu
-
+bool usernameExists(const vector<User>& users, const string& uname);
+void mainMenu(vector<User>& users, vector<Store>& stores);
+bool userMenu(vector<User>& users, vector<Store>& stores, bool& loggedIn);
+void adminMenu(vector<User>& users, vector<Store>& stores);
+void userLogin(vector<User>& users, bool& loggedIn);
 int selectStoreMenu(const vector<Store>& stores);
 void dispalyStoreDetails(const Store& store);
 
-// Added helper functions for strong borders
+// Draws a border and title for menus
 void printStrongBorder(const string& title)
 {
-    int width = title.length() + 8;
-    cout << string(width, '#') << endl;
-    cout << "## " << title << " ##" << endl;
-    cout << string(width, '#') << endl;
+    int w = static_cast<int>(title.length()) + 8;
+    cout << string(w, '#') << '\n'
+        << "## " << title << " ##" << '\n'
+        << string(w, '#') << endl;
 }
 
-void printMenuOption(const string& option)
+// Prints a single menu option line
+void printMenuOption(const string& opt)
 {
-    cout << "|| " << option << endl;
+    cout << "|| " << opt << endl;
 }
 
-int main() // Main Function
+// Displays a clean ASCII table of staff roster
+// Beginner-friendly: uses setw to align columns and draws simple box
+void displayRosterTable(const vector<string>& staff)
 {
-    createStoreFiles(); // Creating store files
-    vector<Store> stores; // Storing Stores inside a vector
-    loadAllStores(stores); // Function for loading all stores from the file 
-
-    vector<User> users; // Storing User inside a vector
-    loadAllUsers(users); // Function for loading all users from the file
-
-    mainMenu(users, stores); // Main Menu Function
-
-    saveAllUsers(users); // Function for saving all users to the file
-    return 0;
-}
-
-// Update 10/06/2025 Started
-
-bool fileExists(const string& filename) // Function to check if files exists
-{
-    ifstream file(filename);
-    return file.is_open(); // Returning filename if file opens
-}
-
-void createStoreFiles()
-{
-    vector<string> stores = { "Auckland.txt", "Christchurch.txt", "Wellington.txt" }; // Maually Adding the 3 stores
-
-    for (const auto& storeFile : stores) // Looping throguh each store file 
+    const int width = 30;
+    // Top border
+    cout << '+' << string(width, '-') << '+' << '\n';
+    cout << "| " << left << setw(width - 2) << "Current Staff Roster" << " |" << '\n';
+    cout << '+' << string(width, '-') << '+' << '\n';
+    // Header row
+    cout << "| " << left << setw(width - 2) << "Name" << " |" << '\n';
+    cout << '+' << string(width, '-') << '+' << '\n';
+    // Each staff
+    for (const auto& s : staff)
     {
-        if (!fileExists(storeFile))
-        {
-            cout << "Created: " << storeFile << endl;
+        // Print name row
+        cout << "| " << left << setw(width - 2) << s << " |" << '\n';
+    }
+    // Bottom border
+    cout << '+' << string(width, '-') << '+' << endl;
+}
 
-            ofstream file(storeFile); // Creating a file
-            if (file.is_open()) // Attempting to open the file
+// Roster management submenu for Admin
+void manageRoster(vector<string>& staff)
+{
+    char choice;
+    do
+    {
+        system("cls");
+        printStrongBorder("Roster Management");
+        printMenuOption("1. Add Staff");
+        printMenuOption("2. Delete Staff");
+        printMenuOption("3. Show All Staff Scheduled");
+        printMenuOption("4. Roster Staff Functions");
+        printMenuOption("5. Back");
+        cout << string(30, '#') << endl;
+        cout << "Option: "; cin >> choice;
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << endl;
+        switch (choice)
+        {
+        case '1': // Add staff
+        {
+            cout << "Enter new staff name: ";
+            string name; getline(cin, name);
+            if (name.empty())
+                cout << "(Error) Name cannot be empty." << endl;
+            else
             {
-                file.close(); // Closing file
+                staff.push_back(name); // Add to list
+                cout << "Added: " << name << endl;
+            }
+            cout << "\nPress any key to continue...";
+            _getch();
+        } break;
+        case '2': // Delete staff
+        {
+            if (staff.empty())
+            {
+                cout << "(Error) No staff to delete." << endl;
             }
             else
             {
-                cout << "(Error) Could not create file : " << storeFile << endl; // Error Message
+                cout << "Select staff to delete:" << endl;
+                for (size_t i = 0; i < staff.size(); ++i)
+                    cout << i + 1 << ". " << staff[i] << endl;
+                cout << "Enter number: ";
+                int num; cin >> num;
+                cin.ignore();
+                if (num < 1 || num > static_cast<int>(staff.size()))
+                    cout << "(Error) Invalid selection." << endl;
+                else
+                {
+                    cout << "Deleted: " << staff[num - 1] << endl;
+                    staff.erase(staff.begin() + (num - 1));
+                }
             }
+            cout << "\nPress any key to continue...";
+            _getch();
+        } break;
+        case '3': // Show roster table
+        {
+            system("cls");
+            // Display the roster as a table
+            displayRosterTable(staff);
+            cout << "\nPress any key to continue...";
+            _getch();
+        } break;
+        case '4': // Placeholder for future functions
+        {
+            system("cls");
+            printStrongBorder("Roster Staff Functions");
+            cout << "Feature coming soon!" << endl;
+            cout << "\nPress any key to continue...";
+            _getch();
+        } break;
+        case '5': // Back
+            break;
+        default:
+            cout << "(Error) Invalid input." << endl;
+            cout << "\nPress any key to continue...";
+            _getch();
+        }
+    } while (choice != '5');
+}
+
+// Checks if a username already exists (to enforce uniqueness)
+bool usernameExists(const vector<User>& users, const string& uname)
+{
+    for (const auto& u : users)
+        if (u.getUsername() == uname)
+            return true;
+    return false;
+}
+
+// Main entry point
+int main()
+{
+    createStoreFiles();               // Ensure store files exist
+    vector<Store> stores;
+    loadAllStores(stores);            // Load data for each store
+
+    vector<User> users;
+    loadAllUsers(users);              // Load existing users
+
+    mainMenu(users, stores);          // Launch main menu loop
+
+    saveAllUsers(users);              // Save users on exit
+    return 0;
+}
+
+// Creates store files if they don't exist (blank initial files)
+void createStoreFiles()
+{
+    vector<string> files = { "Auckland.txt", "Christchurch.txt", "Wellington.txt" };
+    for (const auto& fn : files)
+    {
+        if (!fileExists(fn))
+        {
+            cout << "Created: " << fn << endl;
+            ofstream f(fn); // Create empty file
+            if (f.is_open()) f.close();
+            else cout << "(Error) Could not create file: " << fn << endl;
         }
     }
     cout << endl;
 }
 
-void loadAllStores(vector<Store>& stores) // Function to load all store data into the vector
+// Checks if a file exists (openable)
+bool fileExists(const string& fn)
 {
-    vector<string> filenames = { "Auckland.txt", "Christchurch.txt", "Wellington.txt" }; // Filesnames to load from
-    vector<string> locations = { "Auckland", "Christchurch", "Wellington" }; // Storing store locations
+    ifstream f(fn);
+    return f.is_open();
+}
 
-    for (int i = 0; i < filenames.size(); i++) // Looping throguh all store files
+// Load all stores and their products
+void loadAllStores(vector<Store>& stores)
+{
+    vector<string> filenames = { "Auckland.txt", "Christchurch.txt", "Wellington.txt" };
+    vector<string> locations = { "Auckland", "Christchurch", "Wellington" };
+    for (size_t i = 0; i < filenames.size(); ++i)
     {
-        Store store; // Creating a store object
-        store.storeLocation = locations[i]; // Assingning store location 
-        store.loadProcutsFromFile(filenames[i]); // Loading products from the file
-        stores.push_back(store); // Add store to the list
+        Store s;
+        s.storeLocation = locations[i];
+        s.loadProcutsFromFile(filenames[i]);
+        stores.push_back(s);
     }
 }
 
-void dispalyStoreDetails(const Store& store) // Function to display store details
+// Displays details for a selected store
+void dispalyStoreDetails(const Store& store)
 {
-    system("cls"); // Clearing screen
+    system("cls");
     printStrongBorder("Store Details");
-    cout << "Location : " << store.storeLocation << endl;
-    cout << "Products : " << endl;
-    store.displayProducts(); // Function to display all products in the selected store file
+    cout << "Location: " << store.storeLocation << endl
+        << "Products:" << endl;
+    store.displayProducts();
     cout << endl;
 }
 
-int selectStoreMenu(const vector<Store>& stores) // Function to allow users to select a store from the list
+// Menu for selecting which store to browse
+int selectStoreMenu(const vector<Store>& stores)
 {
-    system("cls"); // Clearing screen
+    system("cls");
     printStrongBorder("Select a Store");
-
-    printMenuOption("1. " + stores[0].storeLocation);
-    printMenuOption("2. " + stores[1].storeLocation);
-    printMenuOption("3. " + stores[2].storeLocation);
+    for (size_t i = 0; i < stores.size(); ++i)
+        printMenuOption(to_string(i + 1) + ". " + stores[i].storeLocation);
     printMenuOption("4. Back");
     cout << string(30, '#') << endl;
-
-    cout << "Option : ";
-    char option;
-    cin >> option; // Getting user input
+    cout << "Option: ";
+    char opt; cin >> opt;
     cout << endl;
-
-    switch (option) // Using switch case to go to user option
+    switch (opt)
     {
-    case '1': return 0; // Index value is 0 (Auckland)
-    case '2': return 1; // Index value is 1 (Christchurch)
-    case '3': return 2; // Index value is 2 (Wellington)
-    case '4': return -1; // Back
+    case '1': return 0;
+    case '2': return 1;
+    case '3': return 2;
+    case '4': return -1;
     default:
         system("cls");
-        cout << "\n(Error Message) Please enter the correct input\n" << endl;
+        cout << "(Error) Invalid input." << endl;
         return -1;
     }
 }
 
-// // Update 12/06/2025 Ended
-
-void saveAllUsers(const vector<User>& users) // Function for saving all users inside the file
+// Saves all users to file on exit
+void saveAllUsers(const vector<User>& users)
 {
-    try {
-        ofstream file("Users.txt"); // Output File 
-        if (!file.is_open()) // Checking if the file has opened
-        {
-            throw runtime_error("Failed to open Users.txt for writing.");
-        }
-
-        for (const auto& user : users) // Using a auto for loop to save all the data in the user to the file
-        {
-            user.saveToFile(file);
-        }
-
-        file.close(); // Closing the file
+    try
+    {
+        ofstream f("Users.txt");
+        if (!f.is_open()) throw runtime_error("Failed to open Users.txt");
+        for (const auto& u : users)
+            u.saveToFile(f);
+        f.close();
     }
-    catch (const exception& e) {
-        cerr << "\n(Error) Could not save users: " << e.what() << endl;
+    catch (const exception& e)
+    {
+        cerr << "(Error) " << e.what() << endl;
     }
 }
 
-void loadAllUsers(vector<User>& users) // Funciton for loading all the users information from the file
+// Loads all existing users from file
+void loadAllUsers(vector<User>& users)
 {
-    try {
-        ifstream file("Users.txt"); // Input File 
-        if (!file.is_open()) // Checking if the file has opened
+    try
+    {
+        ifstream f("Users.txt");
+        if (!f.is_open()) throw runtime_error("Failed to open Users.txt");
+        string line;
+        while (getline(f, line))
         {
-            throw runtime_error("Failed to open Users.txt for reading.");
+            User u;
+            if (u.loadFromLine(line))
+                users.push_back(u);
         }
-
-        string line; // Using a string variales to gather the information
-        while (getline(file, line))
-        {
-            User user;
-            if (user.loadFromLine(line)) // Checking if sussceful in getting the information
-            {
-                users.push_back(user); // Pushing back the users information into the vector
-            }
-        }
-
-        file.close(); // Closing the file
+        f.close();
     }
-    catch (const exception& e) {
-        cerr << "\n(Error) Could not load users: " << e.what() << endl;
+    catch (const exception& e)
+    {
+        cerr << "(Error) " << e.what() << endl;
     }
 }
 
+// Main menu shown at startup
 void mainMenu(vector<User>& users, vector<Store>& stores)
 {
-    char option;
+    char op;
     do
     {
-        system("cls"); // Clearing screen
+        system("cls");
         printStrongBorder("Aotearoa Inventory System");
-
         printMenuOption("1. Store");
-        printMenuOption("2. Login");
-        printMenuOption("3. Exit");
+        printMenuOption("2. Customer Login");
+        printMenuOption("3. Admin Login");
+        printMenuOption("4. Exit");
         cout << string(30, '#') << endl;
-
-        cout << "Option : ";
-        cin >> option;
+        cout << "Option: "; cin >> op;
         cout << endl;
-
-        switch (option)
+        switch (op)
         {
-        case '1':
+        case '1': // Browse stores without login
         {
-            int selectStore;
+            int idx;
             do
             {
-                selectStore = selectStoreMenu(stores);
-                if (selectStore == -1) break;
-                dispalyStoreDetails(stores[selectStore]);
+                idx = selectStoreMenu(stores);
+                if (idx < 0) break;
+                dispalyStoreDetails(stores[idx]);
                 cout << "\nPress any key to continue...";
                 _getch();
             } while (true);
-            break;
-        }
-        case '2':
+        } break;
+        case '2': // Customer login flow
         {
-            bool checkUserLogin = false;
-            userLogin(users, checkUserLogin);
-            while (checkUserLogin)
-            {
-                userMenu(users, stores, checkUserLogin);
-            }
+            bool loggedIn = false;
+            userLogin(users, loggedIn);
+            while (loggedIn)
+                if (!userMenu(users, stores, loggedIn)) break;
+        } break;
+        case '3': // Admin login flow
+            adminMenu(users, stores);
             break;
-        }
-        case '3':
-        {
+        case '4':
             cout << "Exiting Program!" << endl;
             break;
-        }
-        case '&':
-        {
-            adminMenu(users);
-            break;
-        }
         default:
             system("cls");
-            cout << "\n(Error Message) Please enter the correct input\n" << endl;
+            cout << "(Error) Invalid input." << endl;
             break;
         }
-    } while (option != '3');
+    } while (op != '4');
 }
 
-bool userMenu(vector<User>& users, vector<Store>& stores, bool& checkUserLogin)
+// Customer menu after successful login
+bool userMenu(vector<User>& users, vector<Store>& stores, bool& loggedIn)
 {
-    char option;
+    char o;
     do
     {
-        system("cls"); // Clearing screen
-        printStrongBorder("User Menu");
-
-        printMenuOption("1. Store");
-        printMenuOption("2. Account");
-        printMenuOption("3. Sign out");
+        system("cls"); printStrongBorder("User Menu");
+        printMenuOption("1. Store"); printMenuOption("2. Account"); printMenuOption("3. Sign out");
         cout << string(30, '#') << endl;
-
-        cout << "Option : ";
-        cin >> option;
+        cout << "Option: "; cin >> o;
         cout << endl;
-
-        switch (option)
+        switch (o)
         {
-        case '1':
+        case '1': // View stores
         {
-            int selectStore;
+            int idx;
             do
             {
-                selectStore = selectStoreMenu(stores);
-                if (selectStore == -1) break;
-                dispalyStoreDetails(stores[selectStore]);
+                idx = selectStoreMenu(stores);
+                if (idx < 0) break;
+                dispalyStoreDetails(stores[idx]);
                 cout << "\nPress any key to continue...";
                 _getch();
             } while (true);
-            break;
-        }
-        case '2':
-        {
-            system("cls"); // Clearing screen
-            printStrongBorder("Account Details");
-            // Display account information here...
+        } break;
+        case '2': // Account details placeholder
+            system("cls"); printStrongBorder("Account Details");
             cout << "Feature coming soon!" << endl;
             cout << "\nPress any key to continue...";
             _getch();
             break;
-        }
-        case '3':
-        {
-            checkUserLogin = false;
+        case '3': // Sign out
+            loggedIn = false;
             return false;
-        }
         default:
-            cout << "\n(Error Message) Please enter the correct input\n" << endl;
+            cout << "(Error) Invalid input." << endl;
             break;
         }
-    } while (option != '3');
-
+    } while (o != '3');
     return false;
 }
 
-void adminMenu(vector<User>& users)
+// Admin menu: login then admin panel
+void adminMenu(vector<User>& users, vector<Store>& stores)
 {
-    char goBack;
-    string username;
-    string password;
-
+    char c;
+    string usr, pwd;
     do
     {
-        system("cls"); // Clearing screen
-        printStrongBorder("Admin Login");
-
-        printMenuOption("1. Login");
-        printMenuOption("2. Back");
+        system("cls"); printStrongBorder("Admin Login");
+        printMenuOption("1. Login"); printMenuOption("2. Back");
         cout << string(30, '#') << endl;
-
-        cout << "Option : ";
-        cin >> goBack;
-        cin.ignore(); // ingoring the cin operator
+        cout << "Option: "; cin >> c; cin.ignore();
         cout << endl;
-
-        switch (goBack)
+        switch (c)
         {
-        case '1':
-        {
-            cout << "Username : ";
-            getline(cin, username);
-
-            cout << "Password : ";
-            getline(cin, password);
-
-            if (username != "ADMIN" || password != "PASSWORD")
+        case '1': // Admin authentication
+            cout << "Username: "; getline(cin, usr);
+            cout << "Password: "; getline(cin, pwd);
+            if (usr != "ADMIN" || pwd != "PASSWORD")
             {
                 system("cls");
-                cout << "\n(Error Message) Username or Password incorrect!\n" << endl;
+                cout << "(Error) Admin credentials incorrect." << endl;
+                cout << "\nPress any key to retry..."; _getch();
             }
             else
             {
-                system("cls");
-                printStrongBorder("Admin Panel");
-                // Call Admin Panel...
-                cout << "Feature coming soon!" << endl;
-                cout << "\nPress any key to continue...";
-                _getch();
+                // Initial staff roster (in-memory)
+                vector<string> staff = { "Alice – Manager","Bob   – Cashier","Charlie – Stock" };
+                char a;
+                do
+                {
+                    system("cls"); printStrongBorder("Admin Panel");
+                    printMenuOption("1. View Products"); printMenuOption("2. Manage Roster"); printMenuOption("3. Back");
+                    cout << string(30, '#') << endl;
+                    cout << "Option: "; cin >> a; cin.ignore();
+                    cout << endl;
+                    switch (a)
+                    {
+                    case '1': // Browse store products
+                    {
+                        int idx;
+                        do
+                        {
+                            idx = selectStoreMenu(stores);
+                            if (idx < 0) break;
+                            dispalyStoreDetails(stores[idx]);
+                            cout << "\nPress any key to continue...";
+                            _getch();
+                        } while (true);
+                    } break;
+                    case '2': // Manage staff roster
+                        manageRoster(staff);
+                        break;
+                    case '3': // Back to main menu
+                        break;
+                    default:
+                        cout << "(Error) Invalid input." << endl;
+                        _getch();
+                        break;
+                    }
+                } while (a != '3');
             }
             break;
-        }
-        case '2':
+        case '2': // Back to main menu
             break;
         default:
-            system("cls");
-            cout << "\n(Error Message) Please enter the correct input\n" << endl;
+            system("cls"); cout << "(Error) Invalid input." << endl;
             break;
         }
-    } while (goBack != '2');
+    } while (c != '2');
 }
 
-bool usernameExists(const vector<User>& users, const string& username) // Function for checking if username exists
+// Customer login and registration menu
+void userLogin(vector<User>& users, bool& loggedIn)
 {
-    for (const auto& user : users) // Auto for loop for users
-    {
-        if (user.getUsername() == username) // Checking if the temperary username is the same with any other username in the system
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-void userLogin(vector<User>& users, bool& checkUserLogin) // User Login Menu
-{
-    char option;
-
+    char o;
     do
     {
-        if (checkUserLogin) break;
-
-        system("cls"); // Clearing screen
-        printStrongBorder("User Login");
-
-        printMenuOption("1. Sign In");
-        printMenuOption("2. Register An Account");
-        printMenuOption("3. Back");
+        system("cls"); printStrongBorder("Customer Login");
+        printMenuOption("1. Sign In"); printMenuOption("2. Register An Account"); printMenuOption("3. Back");
         cout << string(35, '#') << endl;
-
-        cout << "Option : ";
-        cin >> option; // Getting user's input
+        cout << "Option: "; cin >> o; cin.ignore();
         cout << endl;
-
-        switch (option)
+        switch (o)
         {
-        case '1':
+        case '1': // Sign in flow
         {
-            string tempUsername, tempPassword;
-            bool userFound = false;
-
-            cin.ignore();
-            cout << "Username : ";
-            getline(cin, tempUsername);
-            cout << endl;
-
-            cout << "Password : ";
-            getline(cin, tempPassword);
-            cout << endl;
-
-            for (User& user : users)
+            string u, p;
+            cout << "Username: "; getline(cin, u);
+            cout << "Password: "; getline(cin, p);
+            bool found = false;
+            for (auto& x : users)
             {
-                if (user.getUsername() == tempUsername && user.checkPassword(tempPassword))
+                if (x.getUsername() == u && x.checkPassword(p))
                 {
                     system("cls");
-                    cout << "Welcome back, " << user.name << "!" << endl;
-                    userFound = true;
-                    checkUserLogin = true;
+                    cout << "Welcome back, " << x.name << "!" << endl;
+                    loggedIn = true;
+                    found = true;
                     break;
                 }
             }
-
-            if (!userFound)
+            if (!found)
             {
-                cout << "\n(Error Message) Invalid username or password!\n" << endl;
-                cout << "Press any key to retry...";
+                cout << "(Error) Invalid credentials." << endl;
+                cout << "\nPress any key to retry...";
                 _getch();
             }
-            break;
-        }
-        case '2':
+        } break;
+        case '2': // Registration flow
         {
-            cin.ignore();
-            User newUser;
+            User nu;
             string uname;
-            bool exists;
-
+            bool ex;
             do
             {
-                cout << "Enter A Username : ";
-                getline(cin, uname);
-                cout << endl;
-
-                exists = usernameExists(users, uname);
-                if (exists)
-                {
-                    cout << "\n(Error Message) That username is already taken. Please choose another!\n" << endl;
-                }
-                else
-                {
-                    break;
-                }
-            } while (true);
-
-            newUser.setUsername(uname);
-            newUser.setUpPassword();
-            newUser.getInformation();
-            users.push_back(newUser);
-
-            cout << "Registration Completed!" << endl;
+                cout << "Enter a Username: "; getline(cin, uname);
+                ex = usernameExists(users, uname);
+                if (ex) cout << "(Error) Username taken." << endl;
+            } while (ex);
+            nu.setUsername(uname);
+            nu.setUpPassword();
+            nu.getInformation();
+            users.push_back(nu);
+            cout << "Registration completed!" << endl;
             cout << "\nPress any key to continue...";
             _getch();
-            break;
-        }
-        case '3':
-            break;
+        } break;
+        case '3': // Back to main menu
+            return;
         default:
-            system("cls");
-            cout << "\n(Error Message) Please enter the correct input\n" << endl;
+            cout << "(Error) Invalid input." << endl;
             break;
         }
-    } while (option != '3');
+    } while (o != '3');
 }
 

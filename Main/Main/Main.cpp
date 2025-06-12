@@ -609,7 +609,7 @@ void userLogin(vector<User>& users, bool& loggedIn)
                     cout << "Welcome back, " << x.name << "!" << endl;
                     loggedIn = true;
                     found = true;
-                    break;
+                    return;
                 }
             }
             if (!found)

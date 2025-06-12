@@ -201,9 +201,9 @@ void dispalyStoreDetails(const Store& store);
 // Added helper functions for strong borders
 void printStrongBorder(const string& title)
 {
-    int width = title.length() + 10;
+    int width = title.length() + 8;
     cout << string(width, '#') << endl;
-    cout << "##  " << title << string(width - 6 - title.length(), ' ') << "##" << endl;
+    cout << "## " << title << " ##" << endl;
     cout << string(width, '#') << endl;
 }
 
@@ -218,7 +218,7 @@ int main() // Main Function
     vector<Store> stores; // Storing Stores inside a vector
     loadAllStores(stores); // Function for loading all stores from the file 
 
-    vector <User> users; // Storing User inside a vector
+    vector<User> users; // Storing User inside a vector
     loadAllUsers(users); // Function for loading all users from the file
 
     mainMenu(users, stores); // Main Menu Function
@@ -234,34 +234,31 @@ bool fileExists(const string& filename) // Function to check if files exists
     ifstream file(filename);
     return file.is_open(); // Returning filename if file opens
 }
+
 void createStoreFiles()
 {
     vector<string> stores = { "Auckland.txt", "Christchurch.txt", "Wellington.txt" }; // Maually Adding the 3 stores
 
-
-
     for (const auto& storeFile : stores) // Looping throguh each store file 
     {
-        ifstream checkFIle(storeFile); // Checking if files already exists
         if (!fileExists(storeFile))
         {
-            cout << "Created: ";
+            cout << "Created: " << storeFile << endl;
 
             ofstream file(storeFile); // Creating a file
             if (file.is_open()) // Attempting to open the file
             {
-                // cout << storeFile << " "; // Checking to see if the files are created (Remove the // for testing)
                 file.close(); // Closing file
             }
             else
             {
-                cout << "(Error) Could not created file : " << storeFile << endl; // Error Message
+                cout << "(Error) Could not create file : " << storeFile << endl; // Error Message
             }
         }
-
     }
     cout << endl;
 }
+
 void loadAllStores(vector<Store>& stores) // Function to load all store data into the vector
 {
     vector<string> filenames = { "Auckland.txt", "Christchurch.txt", "Wellington.txt" }; // Filesnames to load from
@@ -275,57 +272,44 @@ void loadAllStores(vector<Store>& stores) // Function to load all store data int
         stores.push_back(store); // Add store to the list
     }
 }
+
 void dispalyStoreDetails(const Store& store) // Function to display store details
 {
-    cout << "Store Details \n" << endl;
-    cout << "Location :" << store.storeLocation << endl;
+    system("cls"); // Clearing screen
+    printStrongBorder("Store Details");
+    cout << "Location : " << store.storeLocation << endl;
     cout << "Products : " << endl;
     store.displayProducts(); // Function to display all products in the selected store file
     cout << endl;
 }
+
 int selectStoreMenu(const vector<Store>& stores) // Function to allow users to select a store from the list
 {
-    char option; // Variable for user input
+    system("cls"); // Clearing screen
+    printStrongBorder("Select a Store");
 
-    cout << "Select a store" << endl;
-
-    // Displaying the store locations
-    cout << "1. " << stores[0].storeLocation << endl;
-    cout << "2. " << stores[1].storeLocation << endl;
-    cout << "3. " << stores[2].storeLocation << endl;
-    cout << "4. " << "Back" << endl;
+    printMenuOption("1. " + stores[0].storeLocation);
+    printMenuOption("2. " + stores[1].storeLocation);
+    printMenuOption("3. " + stores[2].storeLocation);
+    printMenuOption("4. Back");
+    cout << string(30, '#') << endl;
 
     cout << "Option : ";
+    char option;
     cin >> option; // Getting user input
     cout << endl;
 
     switch (option) // Using switch case to go to user option
     {
-    case '1': // Case 1, Displays store (Auckland)
-    {
-        return 0; // Index value is 1
-    }
-    case '2': // Case 2, Displays Store (Christchurch)
-    {
-        return 1; // Index value is 2
-    }
-    case '3': // Case 3, Displays Store (Wellingtion)
-    {
-        return 2; // Index value is 3
-    }
-    case '4': // Case 4, Goes back to menu
-    {
-        // Back
-        return -1; // To go back 
-    }
+    case '1': return 0; // Index value is 0 (Auckland)
+    case '2': return 1; // Index value is 1 (Christchurch)
+    case '3': return 2; // Index value is 2 (Wellington)
+    case '4': return -1; // Back
     default:
-    {
-        system("cls"); // Clearing screen
-        cout << "\n(Error Message) Please enter the correct input\n" << endl; // Displaying error message
+        system("cls");
+        cout << "\n(Error Message) Please enter the correct input\n" << endl;
+        return -1;
     }
-    }
-
-
 }
 
 // // Update 12/06/2025 Ended
@@ -350,6 +334,7 @@ void saveAllUsers(const vector<User>& users) // Function for saving all users in
         cerr << "\n(Error) Could not save users: " << e.what() << endl;
     }
 }
+
 void loadAllUsers(vector<User>& users) // Funciton for loading all the users information from the file
 {
     try {
@@ -379,14 +364,15 @@ void loadAllUsers(vector<User>& users) // Funciton for loading all the users inf
 void mainMenu(vector<User>& users, vector<Store>& stores)
 {
     char option;
-    printStrongBorder("Aotearoa Inventory System");
-
     do
     {
+        system("cls"); // Clearing screen
+        printStrongBorder("Aotearoa Inventory System");
+
         printMenuOption("1. Store");
         printMenuOption("2. Login");
         printMenuOption("3. Exit");
-        cout << string(30, '=') << endl;
+        cout << string(30, '#') << endl;
 
         cout << "Option : ";
         cin >> option;
@@ -396,26 +382,20 @@ void mainMenu(vector<User>& users, vector<Store>& stores)
         {
         case '1':
         {
-            int selectStore; // Varaible for selected store
-
+            int selectStore;
             do
             {
-                selectStore = selectStoreMenu(stores); // Function to select store 
-
-                if (selectStore == -1)
-                {
-                    // Going back 
-                    break;
-                }
-
-                dispalyStoreDetails(stores[selectStore]); // Displaying the store
-
+                selectStore = selectStoreMenu(stores);
+                if (selectStore == -1) break;
+                dispalyStoreDetails(stores[selectStore]);
+                cout << "\nPress any key to continue...";
+                _getch();
             } while (true);
+            break;
         }
         case '2':
         {
             bool checkUserLogin = false;
-            // Login Menu;
             userLogin(users, checkUserLogin);
             while (checkUserLogin)
             {
@@ -430,8 +410,6 @@ void mainMenu(vector<User>& users, vector<Store>& stores)
         }
         case '&':
         {
-            system("cls");
-            // Admin login menu
             adminMenu(users);
             break;
         }
@@ -441,21 +419,22 @@ void mainMenu(vector<User>& users, vector<Store>& stores)
             break;
         }
     } while (option != '3');
-
 }
+
 bool userMenu(vector<User>& users, vector<Store>& stores, bool& checkUserLogin)
 {
     char option;
-
     do
     {
-        cout << "User Menu\n" << endl;
+        system("cls"); // Clearing screen
+        printStrongBorder("User Menu");
 
-        cout << "1. Store" << endl;
-        cout << "2. Account" << endl;
-        cout << "3. Sign out" << endl;
+        printMenuOption("1. Store");
+        printMenuOption("2. Account");
+        printMenuOption("3. Sign out");
+        cout << string(30, '#') << endl;
 
-        cout << "option : ";
+        cout << "Option : ";
         cin >> option;
         cout << endl;
 
@@ -463,101 +442,95 @@ bool userMenu(vector<User>& users, vector<Store>& stores, bool& checkUserLogin)
         {
         case '1':
         {
-            // Store menu;
-
-            int selectStore; // Varaible for selected store
-
+            int selectStore;
             do
             {
-                selectStore = selectStoreMenu(stores); // Function to select store 
-
-                if (selectStore == -1)
-                {
-                    // Going back 
-                    break;
-                }
-
-                dispalyStoreDetails(stores[selectStore]); // Displaying the store
-
+                selectStore = selectStoreMenu(stores);
+                if (selectStore == -1) break;
+                dispalyStoreDetails(stores[selectStore]);
+                cout << "\nPress any key to continue...";
+                _getch();
             } while (true);
-
             break;
         }
         case '2':
         {
-            cout << "Account details";
-            // Display account information with weekly and fornitly and monthly spendings!
+            system("cls"); // Clearing screen
+            printStrongBorder("Account Details");
+            // Display account information here...
+            cout << "Feature coming soon!" << endl;
+            cout << "\nPress any key to continue...";
+            _getch();
             break;
         }
         case '3':
         {
             checkUserLogin = false;
-            // Bool variable
-           // mainMenu(users, stores);
-            return 0;
+            return false;
         }
         default:
-            cout << "Error" << endl; // Change the error message later...
+            cout << "\n(Error Message) Please enter the correct input\n" << endl;
+            break;
         }
     } while (option != '3');
 
+    return false;
 }
+
 void adminMenu(vector<User>& users)
 {
-    string userAdmin = "ADMIN"; // Default varables
-    string passAdmin = "PASSWORD"; // Default varables
-
     char goBack;
     string username;
     string password;
 
-    printStrongBorder("Admin Login");
-
-    do // Do While loop
+    do
     {
+        system("cls"); // Clearing screen
+        printStrongBorder("Admin Login");
+
         printMenuOption("1. Login");
         printMenuOption("2. Back");
-        cout << string(30, '=') << endl;
+        cout << string(30, '#') << endl;
 
         cout << "Option : ";
-
-        cin >> goBack; // Getting user input
+        cin >> goBack;
         cin.ignore(); // ingoring the cin operator
         cout << endl;
 
-        switch (goBack) // Switch Case
+        switch (goBack)
         {
-        case '1': // Login Menu
+        case '1':
         {
             cout << "Username : ";
-            getline(cin, username); // Getting user input 
+            getline(cin, username);
 
             cout << "Password : ";
-            getline(cin, password); // Getting user input
+            getline(cin, password);
 
-            if (username != userAdmin || password != passAdmin) // Check if user input is Correct or Not
+            if (username != "ADMIN" || password != "PASSWORD")
             {
-                system("cls"); // clearing screen for clear display
-                cout << "\n(Error Message) Username or Password incorrected!\n" << endl;
+                system("cls");
+                cout << "\n(Error Message) Username or Password incorrect!\n" << endl;
             }
             else
             {
-                cout << "Admin Panel..." << endl;
+                system("cls");
+                printStrongBorder("Admin Panel");
                 // Call Admin Panel...
+                cout << "Feature coming soon!" << endl;
+                cout << "\nPress any key to continue...";
+                _getch();
             }
             break;
         }
-        case '2': // Exiting Switch case
-        {
+        case '2':
+            break;
+        default:
+            system("cls");
+            cout << "\n(Error Message) Please enter the correct input\n" << endl;
             break;
         }
-        default:
-            system("cls"); // Clearing screen for clear display
-            cout << "\n(Error Message) Please enter the correct input\n" << endl; // Givng user an error message when wrong
-        }
-
-    } while (goBack != '2'); // if goBack == 2 then close the while loop
-
+    } while (goBack != '2');
 }
 
 bool usernameExists(const vector<User>& users, const string& username) // Function for checking if username exists
@@ -566,30 +539,28 @@ bool usernameExists(const vector<User>& users, const string& username) // Functi
     {
         if (user.getUsername() == username) // Checking if the temperary username is the same with any other username in the system
         {
-            return true; // Returning true if its found one
+            return true;
         }
     }
 
-    return false; // Returning false if not
+    return false;
 }
+
 void userLogin(vector<User>& users, bool& checkUserLogin) // User Login Menu
 {
     char option;
 
-    do // Do while loop 
+    do
     {
+        if (checkUserLogin) break;
 
-        if (checkUserLogin) // Checking if signed in already
-        {
-            break;
-        }
-
+        system("cls"); // Clearing screen
         printStrongBorder("User Login");
 
         printMenuOption("1. Sign In");
         printMenuOption("2. Register An Account");
         printMenuOption("3. Back");
-        cout << string(35, '=') << endl;
+        cout << string(35, '#') << endl;
 
         cout << "Option : ";
         cin >> option; // Getting user's input
@@ -597,88 +568,81 @@ void userLogin(vector<User>& users, bool& checkUserLogin) // User Login Menu
 
         switch (option)
         {
-        case '1': // Sign in Case
+        case '1':
         {
             string tempUsername, tempPassword;
             bool userFound = false;
 
-            cin.ignore(); // Ignoring cin input
+            cin.ignore();
             cout << "Username : ";
-            getline(cin, tempUsername); // Getting users input for username
+            getline(cin, tempUsername);
             cout << endl;
 
             cout << "Password : ";
-            getline(cin, tempPassword); // Getting users input for password
+            getline(cin, tempPassword);
             cout << endl;
 
-            for (User& user : users) // Auto for loop to read all users data
+            for (User& user : users)
             {
-                if (user.getUsername() == tempUsername && user.checkPassword(tempPassword)) // Checking if users has entered the same values for a user
+                if (user.getUsername() == tempUsername && user.checkPassword(tempPassword))
                 {
-                    cout << "Welcome back, " << user.name << endl; // Giving the user a welcome back message if loged in
-                    userFound = true; // User found is set to true
-
+                    system("cls");
+                    cout << "Welcome back, " << user.name << "!" << endl;
+                    userFound = true;
                     checkUserLogin = true;
-                    break; // Breaking loop
+                    break;
                 }
             }
 
-            if (!userFound) // If User hasn't been found then give error message
+            if (!userFound)
             {
-                cout << "\n(Error Message) Invalid username or password!\n" << endl; // Error message
+                cout << "\n(Error Message) Invalid username or password!\n" << endl;
+                cout << "Press any key to retry...";
+                _getch();
             }
-
-            break; // Breaking switch case
-
+            break;
         }
-        case '2': // Sign up case
+        case '2':
         {
-            cin.ignore(); // Ignoring cin input
-
-            User newUser; // User class
-            string username; // Temperary username variable
+            cin.ignore();
+            User newUser;
+            string uname;
             bool exists;
 
-            do // Do while loop
+            do
             {
                 cout << "Enter A Username : ";
-                getline(cin, username); // Geting user input for Username
+                getline(cin, uname);
                 cout << endl;
 
-                exists = usernameExists(users, username); // Checking for the same usernames, if so
-
+                exists = usernameExists(users, uname);
                 if (exists)
                 {
-                    cout << "\n(Error Message) That username is already taken. Please choose another!\n" << endl; // Error message
+                    cout << "\n(Error Message) That username is already taken. Please choose another!\n" << endl;
                 }
                 else
                 {
-                    break; // Breaking out of while loop
+                    break;
                 }
-            } while (true); // True by default until broken or false
+            } while (true);
 
-            newUser.setUsername(username); // Setting the usernames into the users member value
-            newUser.setUpPassword(); // Setting the users password, which is stored in the users member value
-            newUser.getInformation(); // Getting the users information and storing into the users member values
-            users.push_back(newUser); // Pushing back into the vector switch for storing
+            newUser.setUsername(uname);
+            newUser.setUpPassword();
+            newUser.getInformation();
+            users.push_back(newUser);
 
-            cout << "Registation Completed!" << endl; // Displaying a message to let the user know they created an account
-            break; // Breaking out of switch case
+            cout << "Registration Completed!" << endl;
+            cout << "\nPress any key to continue...";
+            _getch();
+            break;
         }
-        case '3': // Case 3 - Go back
-        {
-            // Going back to main menu
-            break; // Breaking out of case
-        }
+        case '3':
+            break;
         default:
-
-            system("cls"); // Clearing screen for clear display
-            cout << "\n(Error Message) Please enter the correct input\n" << endl; // Givng user an error message when wrong
+            system("cls");
+            cout << "\n(Error Message) Please enter the correct input\n" << endl;
+            break;
         }
-    } while (option != '3'); // Keep loop while option doesn't equal 3 (3. Go back)
-
+    } while (option != '3');
 }
 
-.
-// able to edit the products and it contains prices or something...
-// 

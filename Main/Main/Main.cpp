@@ -9,6 +9,63 @@
 #include <stdexcept> // For runtime_error
 using namespace std;
 
+struct Product // Structure Product to hold individuals products with details
+{
+public: // Public Variables
+
+    string productName; // Variable for name of product
+    double price; // User's won't be getting charged, only cosmetic 
+    int quantity; // Variable for quantity available in stock
+};
+
+struct Store // Strucutre Store to hold store information
+{
+public: // Public Variables
+
+    string storeLocation; // Variable for Store Location
+    vector<Product> products; // Varible for list of products 
+
+    bool loadProcutsFromFile(const string& filename) // Loads prudocts from a given file into the store's prodcut list
+    {
+        // Could have a try catch block...
+        ifstream file(filename); // Checking if failed to open file
+        if (!file.is_open())
+        {
+            cout << "(Error) Failed to open " << filename << ".txt for reading" << endl;
+            return false;
+        }
+
+        string line; // Varaible to store each line from the file
+        while (getline(file, line)) // Reading line by line
+        {
+            stringstream ss(line); // Creating a string stream from the line
+            string productName, priceStr, quantityStr; // Temporary variables
+
+            if (getline(ss, productName, ',') && getline(ss, priceStr, ',') && getline(ss, quantityStr))
+            {
+                Product product; // Creating a new Product object
+                product.productName = productName; // Assigning product name
+                product.price = atof(priceStr.c_str()); // Converting price from string to a double value
+                product.quantity = atoi(quantityStr.c_str()); // Converting quantity fro string to a integer
+
+                products.push_back(product); // Adding the product to the store'ss product list
+            }
+        }
+
+        file.close(); // Closing the file
+        return true;
+    }
+
+    void displayProducts() const // Function for displaying the store's products list 
+    {
+        cout << "Products in " + storeLocation << endl;
+        for (const auto& product : products) // Looping throguh all products in the list
+        {
+            cout << product.productName << " | $:" << product.price << " | Stock : " << product.quantity << endl;
+        }
+    }
+};
+
 struct User
 {
 protected: // Private Variables
@@ -125,14 +182,21 @@ public: // Public Variables
 
 };
 
+void createStoreFiles();
+bool fileExists(const string& filename);
+void loadAllStores(vector<Store>& Stores);
 void saveAllUsers(const vector<User>& users);
 void loadAllUsers(vector<User>& users);
 
 bool usernameExists(const vector<User>& users, const string& username);
 
-void mainMenu(vector<User>& users); // Main Menu Function
-void adminMenu(vector<User>& users); // Admin Menu
-void userLogin(vector<User>& users); // User Login Menu
+void mainMenu(vector<User>& users, vector<Store>& stores); // Main Menu Function
+bool userMenu(vector<User>& users, vector<Store>& stores, bool& checkUserLogin);
+void adminMenu(vector<User>& users); // Admin Menu - Add store later....
+void userLogin(vector<User>& users, bool& checkUserLogin); // User Login Menu
+
+int selectStoreMenu(const vector<Store>& stores);
+void dispalyStoreDetails(const Store& store);
 
 // Added helper functions for strong borders
 void printStrongBorder(const string& title)
@@ -148,16 +212,123 @@ void printMenuOption(const string& option)
     cout << "|| " << option << endl;
 }
 
-int main()
+int main() // Main Function
 {
+    createStoreFiles(); // Creating store files
+    vector<Store> stores; // Storing Stores inside a vector
+    loadAllStores(stores); // Function for loading all stores from the file 
+
     vector <User> users; // Storing User inside a vector
     loadAllUsers(users); // Function for loading all users from the file
 
-    mainMenu(users); // Main Menu Function
+    mainMenu(users, stores); // Main Menu Function
 
     saveAllUsers(users); // Function for saving all users to the file
     return 0;
 }
+
+// Update 10/06/2025 Started
+
+bool fileExists(const string& filename) // Function to check if files exists
+{
+    ifstream file(filename);
+    return file.is_open(); // Returning filename if file opens
+}
+void createStoreFiles()
+{
+    vector<string> stores = { "Auckland.txt", "Christchurch.txt", "Wellington.txt" }; // Maually Adding the 3 stores
+
+
+
+    for (const auto& storeFile : stores) // Looping throguh each store file 
+    {
+        ifstream checkFIle(storeFile); // Checking if files already exists
+        if (!fileExists(storeFile))
+        {
+            cout << "Created: ";
+
+            ofstream file(storeFile); // Creating a file
+            if (file.is_open()) // Attempting to open the file
+            {
+                // cout << storeFile << " "; // Checking to see if the files are created (Remove the // for testing)
+                file.close(); // Closing file
+            }
+            else
+            {
+                cout << "(Error) Could not created file : " << storeFile << endl; // Error Message
+            }
+        }
+
+    }
+    cout << endl;
+}
+void loadAllStores(vector<Store>& stores) // Function to load all store data into the vector
+{
+    vector<string> filenames = { "Auckland.txt", "Christchurch.txt", "Wellington.txt" }; // Filesnames to load from
+    vector<string> locations = { "Auckland", "Christchurch", "Wellington" }; // Storing store locations
+
+    for (int i = 0; i < filenames.size(); i++) // Looping throguh all store files
+    {
+        Store store; // Creating a store object
+        store.storeLocation = locations[i]; // Assingning store location 
+        store.loadProcutsFromFile(filenames[i]); // Loading products from the file
+        stores.push_back(store); // Add store to the list
+    }
+}
+void dispalyStoreDetails(const Store& store) // Function to display store details
+{
+    cout << "Store Details \n" << endl;
+    cout << "Location :" << store.storeLocation << endl;
+    cout << "Products : " << endl;
+    store.displayProducts(); // Function to display all products in the selected store file
+    cout << endl;
+}
+int selectStoreMenu(const vector<Store>& stores) // Function to allow users to select a store from the list
+{
+    char option; // Variable for user input
+
+    cout << "Select a store" << endl;
+
+    // Displaying the store locations
+    cout << "1. " << stores[0].storeLocation << endl;
+    cout << "2. " << stores[1].storeLocation << endl;
+    cout << "3. " << stores[2].storeLocation << endl;
+    cout << "4. " << "Back" << endl;
+
+    cout << "Option : ";
+    cin >> option; // Getting user input
+    cout << endl;
+
+    switch (option) // Using switch case to go to user option
+    {
+    case '1': // Case 1, Displays store (Auckland)
+    {
+        return 0; // Index value is 1
+    }
+    case '2': // Case 2, Displays Store (Christchurch)
+    {
+        return 1; // Index value is 2
+    }
+    case '3': // Case 3, Displays Store (Wellingtion)
+    {
+        return 2; // Index value is 3
+    }
+    case '4': // Case 4, Goes back to menu
+    {
+        // Back
+        return -1; // To go back 
+    }
+    default:
+    {
+        system("cls"); // Clearing screen
+        cout << "\n(Error Message) Please enter the correct input\n" << endl; // Displaying error message
+    }
+    }
+
+
+}
+
+// // Update 12/06/2025 Ended
 
 void saveAllUsers(const vector<User>& users) // Function for saving all users inside the file
 {
@@ -179,7 +350,6 @@ void saveAllUsers(const vector<User>& users) // Function for saving all users in
         cerr << "\n(Error) Could not save users: " << e.what() << endl;
     }
 }
-
 void loadAllUsers(vector<User>& users) // Funciton for loading all the users information from the file
 {
     try {
@@ -206,7 +376,7 @@ void loadAllUsers(vector<User>& users) // Funciton for loading all the users inf
     }
 }
 
-void mainMenu(vector<User>& users)
+void mainMenu(vector<User>& users, vector<Store>& stores)
 {
     char option;
     printStrongBorder("Aotearoa Inventory System");
@@ -224,25 +394,41 @@ void mainMenu(vector<User>& users)
 
         switch (option)
         {
-        case '1': // Case 1 goes to store
+        case '1':
         {
-            // Store menu;
-            cout << "Store Menu..." << endl;
-            break;
+            int selectStore; // Varaible for selected store
+
+            do
+            {
+                selectStore = selectStoreMenu(stores); // Function to select store 
+
+                if (selectStore == -1)
+                {
+                    // Going back 
+                    break;
+                }
+
+                dispalyStoreDetails(stores[selectStore]); // Displaying the store
+
+            } while (true);
         }
-        case '2': // Case 2 goes to login menu
+        case '2':
         {
+            bool checkUserLogin = false;
             // Login Menu;
-            userLogin(users);
+            userLogin(users, checkUserLogin);
+            while (checkUserLogin)
+            {
+                userMenu(users, stores, checkUserLogin);
+            }
             break;
         }
-        case '3': // Case 3 exits program
+        case '3':
         {
-            // Exit
             cout << "Exiting Program!" << endl;
             break;
         }
-        case '&': // Special character to get access to Admin Menu (Supplied in the read me file)
+        case '&':
         {
             system("cls");
             // Admin login menu
@@ -252,11 +438,70 @@ void mainMenu(vector<User>& users)
         default:
             system("cls");
             cout << "\n(Error Message) Please enter the correct input\n" << endl;
+            break;
         }
     } while (option != '3');
 
 }
+bool userMenu(vector<User>& users, vector<Store>& stores, bool& checkUserLogin)
+{
+    char option;
 
+    do
+    {
+        cout << "User Menu\n" << endl;
+
+        cout << "1. Store" << endl;
+        cout << "2. Account" << endl;
+        cout << "3. Sign out" << endl;
+
+        cout << "option : ";
+        cin >> option;
+        cout << endl;
+
+        switch (option)
+        {
+        case '1':
+        {
+            // Store menu;
+
+            int selectStore; // Varaible for selected store
+
+            do
+            {
+                selectStore = selectStoreMenu(stores); // Function to select store 
+
+                if (selectStore == -1)
+                {
+                    // Going back 
+                    break;
+                }
+
+                dispalyStoreDetails(stores[selectStore]); // Displaying the store
+
+            } while (true);
+
+            break;
+        }
+        case '2':
+        {
+            cout << "Account details";
+            // Display account information with weekly and fornitly and monthly spendings!
+            break;
+        }
+        case '3':
+        {
+            checkUserLogin = false;
+            // Bool variable
+           // mainMenu(users, stores);
+            return 0;
+        }
+        default:
+            cout << "Error" << endl; // Change the error message later...
+        }
+    } while (option != '3');
+
+}
 void adminMenu(vector<User>& users)
 {
     string userAdmin = "ADMIN"; // Default varables
@@ -327,13 +572,18 @@ bool usernameExists(const vector<User>& users, const string& username) // Functi
 
     return false; // Returning false if not
 }
-
-void userLogin(vector<User>& users) // User Login Menu
+void userLogin(vector<User>& users, bool& checkUserLogin) // User Login Menu
 {
     char option;
 
     do // Do while loop 
     {
+
+        if (checkUserLogin) // Checking if signed in already
+        {
+            break;
+        }
+
         printStrongBorder("User Login");
 
         printMenuOption("1. Sign In");
@@ -368,7 +618,7 @@ void userLogin(vector<User>& users) // User Login Menu
                     cout << "Welcome back, " << user.name << endl; // Giving the user a welcome back message if loged in
                     userFound = true; // User found is set to true
 
-                    // Taking them to the store......
+                    checkUserLogin = true;
                     break; // Breaking loop
                 }
             }
@@ -429,3 +679,6 @@ void userLogin(vector<User>& users) // User Login Menu
 
 }
 
+.
+// able to edit the products and it contains prices or something...
+// 

@@ -30,3 +30,14 @@ This repository contains the source code for the **Aotearoa Treasures Inventory 
 
 ---
 
+## Todo
+
+- Add a cart for user and its able to store multiple purchases
+- User is able to purchase a product from the store
+- User is able to search for a product within the selected store, exp.(Search function in [Struct] store)
+- User is able to view a summary of there spending, exp.(view summary function in [Struct] User)
+- Add a notifaction feature inside admin menu (To see all stock below values of 5)
+- System shouldn't be able to see any negative values
+  
+- Bailey - "I think thats all thats left really, can discuss on Monday"
+

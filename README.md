@@ -32,7 +32,7 @@ This repository contains the source code for the **Aotearoa Treasures Inventory 
 
 ## Todo
 
-- Add a cart for user and its able to store multiple purchases
+- Add a cart for user and its able to store multiple purchases (DONE - ARLEIA)
 - User is able to purchase a product from the store
 - User is able to search for a product within the selected store, exp.(Search function in [Struct] store)
 - User is able to view a summary of there spending, exp.(view summary function in [Struct] User)

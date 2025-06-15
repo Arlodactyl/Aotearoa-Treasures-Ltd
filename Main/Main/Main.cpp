@@ -43,10 +43,10 @@ struct Store
             if (getline(ss, name, ',') && getline(ss, priceStr, ',') && getline(ss, qtyStr))
             {
                 Product p;
-                p.productName = name;                   // Assign product name
-                p.price = atof(priceStr.c_str()); // Convert string to double
-                p.quantity = atoi(qtyStr.c_str());   // Convert string to int
-                products.push_back(p);                  // Add to vector
+                p.productName = name;                     // Assign product name
+                p.price = atof(priceStr.c_str());         // Convert string to double
+                p.quantity = atoi(qtyStr.c_str());        // Convert string to int
+                products.push_back(p);                    // Add to vector
             }
         }
         file.close(); // Close file when done
@@ -57,13 +57,25 @@ struct Store
     void displayProducts() const
     {
         cout << "Products in " << storeLocation << endl;
+        int idx = 1;
         for (const auto& p : products)
         {
-            cout << p.productName << " | $:" << p.price
+            cout << idx++ << ". " << p.productName << " | $:" << p.price
                 << " | Stock: " << p.quantity << endl;
         }
     }
 };
+
+// Structure CartItem: represents one line in the user's shopping cart
+struct CartItem
+{
+    string productName;  // name of product
+    double price;        // unit price
+    int quantity;        // quantity chosen
+};
+
+// Global cart for the current logged-in session
+vector<CartItem> cart;
 
 // Structure User: holds customer account information
 struct User
@@ -173,6 +185,51 @@ void printStrongBorder(const string& title)
 void printMenuOption(const string& opt)
 {
     cout << "|| " << opt << endl;
+}
+
+// Adds qty of a product into the cart (merges if already present)
+void addToCart(const Product& p, int qty)
+{
+    for (auto& item : cart)
+        if (item.productName == p.productName)
+        {
+            item.quantity += qty;
+            return;
+        }
+    cart.push_back({ p.productName, p.price, qty });
+}
+
+// Displays current cart contents and total
+void displayCart()
+{
+    system("cls");
+    printStrongBorder("Your Cart");
+    if (cart.empty())
+    {
+        cout << "(Your cart is empty)\n\n";
+        return;
+    }
+    double total = 0.0;
+    int idx = 1;
+    for (const auto& item : cart)
+    {
+        double line = item.price * item.quantity;
+        cout << idx++ << ". "
+            << item.productName
+            << " | Qty: " << item.quantity
+            << " | $" << item.price << " each"
+            << " | Subtotal: $" << line
+            << endl;
+        total += line;
+    }
+    cout << "\nTotal: $" << total << "\n\n";
+}
+
+// Clears out the cart
+void clearCart()
+{
+    cart.clear();
+    cout << "Cart cleared.\n\n";
 }
 
 // Displays a clean ASCII table of staff roster
@@ -355,7 +412,7 @@ void dispalyStoreDetails(const Store& store)
     cout << endl;
 }
 
-// Menu for selecting which store to browse
+// Menu for selecting which store to browse CHCH, AUCK, WELL
 int selectStoreMenu(const vector<Store>& stores)
 {
     system("cls");
@@ -476,13 +533,16 @@ bool userMenu(vector<User>& users, vector<Store>& stores, bool& loggedIn)
     do
     {
         system("cls"); printStrongBorder("User Menu");
-        printMenuOption("1. Store"); printMenuOption("2. Account"); printMenuOption("3. Sign out");
+        printMenuOption("1. Store");
+        printMenuOption("2. View Cart");
+        printMenuOption("3. Account");
+        printMenuOption("4. Sign out");
         cout << string(30, '#') << endl;
         cout << "Option: "; cin >> o;
         cout << endl;
         switch (o)
         {
-        case '1': // View stores
+        case '1': // View/browse stores
         {
             int idx;
             do
@@ -490,24 +550,48 @@ bool userMenu(vector<User>& users, vector<Store>& stores, bool& loggedIn)
                 idx = selectStoreMenu(stores);
                 if (idx < 0) break;
                 dispalyStoreDetails(stores[idx]);
-                cout << "\nPress any key to continue...";
+
+                // Add to cart prompt
+                cout << "Enter product number to add to cart (0 = back): ";
+                int choice; cin >> choice;
+                if (choice > 0 && choice <= static_cast<int>(stores[idx].products.size()))
+                {
+                    cout << "Quantity to add: ";
+                    int qty; cin >> qty;
+                    addToCart(stores[idx].products[choice - 1], qty);
+                    cout << "\nAdded to cart! Press any key to continue...";
+                }
+                else
+                {
+                    cout << "\nPress any key to continue...";
+                }
                 _getch();
             } while (true);
         } break;
-        case '2': // Account details placeholder
+
+        case '2': // View Cart
+            displayCart();
+            cout << "Press any key to continue...";
+            _getch();
+            break;
+
+        case '3': // Account details placeholder
             system("cls"); printStrongBorder("Account Details");
             cout << "Feature coming soon!" << endl;
             cout << "\nPress any key to continue...";
             _getch();
             break;
-        case '3': // Sign out
+
+        case '4': // Sign out
             loggedIn = false;
+            clearCart();  // wipe cart for next session
             return false;
+
         default:
             cout << "(Error) Invalid input." << endl;
             break;
         }
-    } while (o != '3');
+    } while (o != '4');
     return false;
 }
 
@@ -646,4 +730,3 @@ void userLogin(vector<User>& users, bool& loggedIn)
         }
     } while (o != '3');
 }
-

@@ -1,5 +1,6 @@
 // Aotearoa_Treasures_Ltd_Menu.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
+
 #include <iostream>
 #include <conio.h>
 #include <string>
@@ -9,7 +10,7 @@
 #include <limits>      // For numeric_limits
 #include <iomanip>     // For setw, left alignment
 #include <stdexcept>   // For runtime_error
-#include <algorithm>
+#include <cstdlib>     // For atoi, atof
 using namespace std;
 
 // Structure Product: holds individual product details
@@ -27,7 +28,7 @@ struct Store
     vector<Product> products;  // List of products
 
     // Loads products from a given file (CSV: name,price,quantity)
-    bool loadProcutsFromFile(const string& filename)
+    bool loadProductsFromFile(const string& filename)
     {
         ifstream file(filename);
         if (!file.is_open())
@@ -44,215 +45,65 @@ struct Store
             if (getline(ss, name, ',') && getline(ss, priceStr, ',') && getline(ss, qtyStr))
             {
                 Product p;
-                p.productName = name;                   // Assign product name
-                p.price = atof(priceStr.c_str());       // Convert string to double
-                p.quantity = atoi(qtyStr.c_str());      // Convert string to int
-                products.push_back(p);                  // Add to vector
+                p.productName = name;                     // Assign product name
+                p.price = atof(priceStr.c_str());         // Convert string to double
+                p.quantity = atoi(qtyStr.c_str());        // Convert string to int
+                products.push_back(p);                    // Add to vector
             }
         }
         file.close(); // Close file when done
         return true;
     }
 
-    void saveProductsToFile(const string& filename) const
-    {
-        ofstream f(filename);
-        if (!f.is_open())
-        {
-            cout << "(Error) Could not open file : " << filename << endl;
-            return;
-        }
-        else
-        {
-            for (const Product& p : products)
-            {
-                f << p.productName << "," << p.price << ',' << p.quantity << endl;
-            }
-
-            f.close();
-        }
-    }
-
     // Displays the list of products in the store
     void displayProducts() const
     {
         cout << "Products in " << storeLocation << endl;
+        int idx = 1;
         for (const auto& p : products)
         {
-            cout << p.productName << " | $:" << p.price
+            cout << idx++ << ". " << p.productName
+                << " | $:" << p.price
                 << " | Stock: " << p.quantity << endl;
         }
     }
 
-    void manageProducts()
+    // Searches for products containing the given keyword
+    void searchProducts(const string& keyword) const
     {
-        char option;
-
-        do
+        cout << "Search results for '" << keyword << "' in " << storeLocation << ":\n";
+        bool found = false;
+        int idx = 1;
+        for (const auto& p : products)
         {
-            cout << "1. Add " << endl;
-            cout << "2. Edit" << endl;
-            cout << "3. Delete" << endl;
-            cout << "4. Back" << endl;
-
-            cout << "Option : ";
-            cin >> option;
-            cout << endl;
-            cin.ignore();
-
-            switch (option)
+            if (p.productName.find(keyword) != string::npos)
             {
-            case '1':
-            {
-                Product p;
-                cout << "Enter Product Name : ";
-                getline(cin, p.productName);
-                cin.ignore();
-
-                cout << "Enter Product Price : ";
-                cin >> p.price;
-                cout << endl;
-
-                cout << "Enter Product Quantity : ";
-                cin >> p.quantity;
-                cout << endl;
-
-                products.push_back(p);
-                cout << "Product Added" << endl;
-                break;
+                cout << idx << ". " << p.productName
+                    << " | $:" << p.price
+                    << " | Stock: " << p.quantity << endl;
+                found = true;
             }
-            case '2':
-            {
-                string selectedItem;
-
-                displayProducts();
-                cout << "Enter a Product Item to edit " << endl;
-                cout << "Item : ";
-                getline(cin, selectedItem);
-
-                for (auto product : products)
-                {
-                    if (product.productName == selectedItem)
-                    {
-                        char o;
-
-                        do
-                        {
-                            cout << "1. Edit Name" << endl;
-                            cout << "2. Edit Price" << endl;
-                            cout << "3. Edit Quantity" << endl;
-                            cout << "4. Back" << endl;
-
-                            cout << "Option : ";
-                            cin >> option;
-                            cout << endl;
-
-                            switch (option)
-                            {
-                            case '1':
-                            {
-                                cout << "Current Name : " << product.productName << endl;
-                                cout << "New Name : ";
-                                getline(cin, product.productName);
-                                cout << endl;
-                                cin.ignore();
-                                break;
-                            }
-                            case '2':
-                            {
-                                cout << "Item : [ " << product.productName << " ]\n" << endl;
-                                cout << "Current Price : " << product.price << endl;
-                                cout << "New Price : ";
-                                cin >> product.price;
-                                cout << endl;
-                                break;
-                            }
-                            case '3':
-                            {
-                                cout << "Item : [ " << product.productName << " ]\n" << endl;
-                                cout << "Current Quantity [Stock] : " << product.quantity << endl;
-                                cout << "New Quantity [Stock] : ";
-                                cin >> product.quantity;
-                                cout << endl;
-                                break;
-                            }
-                            case '4':
-                            {
-                                break;
-                            }
-                            default:
-                            {
-                                cout << "\n(Error) : Something went wrong try again!\n" << endl;
-                                break;
-                            }
-                            }
-                        } while (option != '4');
-                    }
-                }
-                break;
-            }
-            case '3':
-            {
-                string selectedItem;
-                bool check = false;
-                string strCheck;
-
-                displayProducts();
-                cout << "Enter a Product Item to edit " << endl;
-                cout << "Item : ";
-                getline(cin, selectedItem);
-
-
-                for (size_t i = 0; i < products.size(); i++)
-                {
-                    if (products[i].productName == selectedItem)
-                    {
-                        cout << "Are you sure you want to delete this product!" << endl;
-                        cout << "Item : [ " << products[i].productName << "] ";
-                        cout << "Yes | No : ";
-                        cin >> strCheck;
-                        cout << endl;
-
-                        transform(strCheck.begin(), strCheck.end(), strCheck.begin(), ::tolower);
-
-                        while (strCheck != "yes" && strCheck != "no")
-                        {
-                            cout << "(Error) : Invalid Input, Try again \n" << endl;
-                            cout << "Yes | No : ";
-                            cin >> strCheck;
-                            cin.ignore();
-                            cout << endl;
-
-                            transform(strCheck.begin(), strCheck.end(), strCheck.begin(), ::tolower);
-                        }
-
-                        if (strCheck == "yes")
-                        {
-                            products.erase(products.begin() + i);
-                            cout << "Product Deleted" << endl;
-                        }
-                        else
-                        {
-                            cout << "Deletion Cancelled" << endl;
-
-                        }
-                        break;
-                    }
-
-                }
-                break;
-            }
-            case '4':
-            {
-                return;
-            }
-            default:
-                break;
-            }
-        } while (option != '4');
-
+            idx++;
+        }
+        if (!found)
+            cout << "(No matching products found)\n";
     }
 };
+
+// Structure CartItem: represents one line in the user's shopping cart
+struct CartItem
+{
+    string productName;  // name of product
+    double price;        // unit price
+    int quantity;        // quantity chosen
+};
+
+// Global cart for the current logged-in session
+vector<CartItem> cart;
+
+// Forward declaration of User
+struct User;
+User* currentUser = nullptr;
 
 // Structure User: holds customer account information
 struct User
@@ -264,9 +115,10 @@ public:
     string name;
     string surname;
     int age;
+    double totalSpent;   // tracks spending summary
 
     // Default constructor initializes empty fields
-    User() : username(""), password(""), name(""), surname(""), age(0) {}
+    User() : username(""), password(""), name(""), surname(""), age(0), totalSpent(0.0) {}
 
     // Prompts for and validates password (cannot match username)
     void setUpPassword()
@@ -314,31 +166,44 @@ public:
     void saveToFile(ofstream& f) const
     {
         f << username << ',' << password << ','
-            << name << ',' << surname << ',' << age << '\n';
+            << name << ',' << surname << ',' << age << ',' << totalSpent << '\n';
     }
 
     // Loads user data from a CSV line
     bool loadFromLine(const string& line)
     {
         stringstream ss(line);
-        string usr, pwd, nm, sn, ag;
+        string usr, pwd, nm, sn, ag, ts;
         if (!getline(ss, usr, ',') || !getline(ss, pwd, ',') ||
             !getline(ss, nm, ',') || !getline(ss, sn, ',') ||
-            !getline(ss, ag))
+            !getline(ss, ag, ',') || !getline(ss, ts))
             return false;
         username = usr;
         password = pwd;
         name = nm;
         surname = sn;
         age = stoi(ag);
+        totalSpent = stod(ts);
         return true;
+    }
+
+    // Records spending amount into summary
+    void recordSpending(double amount)
+    {
+        totalSpent += amount;
+    }
+
+    // Displays spending summary for user
+    void viewSummary() const
+    {
+        cout << name << " " << surname << "'s Spending Summary:" << endl;
+        cout << "Total spent: $" << totalSpent << "\n\n";
     }
 };
 
-// Function prototypes for clarity
+// Function prototypes
 void createStoreFiles();
 bool fileExists(const string& fn);
-void saveAllStores(vector<Store>& stores);
 void loadAllStores(vector<Store>& stores);
 void saveAllUsers(const vector<User>& users);
 void loadAllUsers(vector<User>& users);
@@ -348,7 +213,15 @@ bool userMenu(vector<User>& users, vector<Store>& stores, bool& loggedIn);
 void adminMenu(vector<User>& users, vector<Store>& stores);
 void userLogin(vector<User>& users, bool& loggedIn);
 int selectStoreMenu(const vector<Store>& stores);
-void dispalyStoreDetails(const Store& store);
+void displayStoreDetails(const Store& store);
+void printStrongBorder(const string& title);
+void printMenuOption(const string& opt);
+void addToCart(const Product& p, int qty);
+void displayCart();
+void clearCart();
+void purchaseCart(vector<Store>& stores);
+void displayRosterTable(const vector<string>& staff);
+void manageRoster(vector<string>& staff);
 
 // Draws a border and title for menus
 void printStrongBorder(const string& title)
@@ -365,25 +238,106 @@ void printMenuOption(const string& opt)
     cout << "|| " << opt << endl;
 }
 
+// Adds qty of a product into the cart (merges if already present)
+void addToCart(const Product& p, int qty)
+{
+    if (qty <= 0) // prevent negative or zero
+    {
+        cout << "(Error) Quantity must be positive." << endl;
+        return;
+    }
+    for (auto& item : cart)
+        if (item.productName == p.productName)
+        {
+            item.quantity += qty;
+            return;
+        }
+    cart.push_back({ p.productName, p.price, qty });
+}
+
+// Displays current cart contents and total
+void displayCart()
+{
+    system("cls");
+    printStrongBorder("Your Cart");
+    if (cart.empty())
+    {
+        cout << "(Your cart is empty)\n\n";
+        return;
+    }
+    double total = 0.0;
+    int idx = 1;
+    for (const auto& item : cart)
+    {
+        double line = item.price * item.quantity;
+        cout << idx++ << ". "
+            << item.productName
+            << " | Qty: " << item.quantity
+            << " | $" << item.price << " each"
+            << " | Subtotal: $" << line
+            << endl;
+        total += line;
+    }
+    cout << "\nTotal: $" << total << "\n\n";
+}
+
+// Clears out the cart
+void clearCart()
+{
+    cart.clear();
+    cout << "Cart cleared." << "\n\n";
+}
+
+// Finalizes purchase: deducts stock and records spending
+void purchaseCart(vector<Store>& stores)
+{
+    if (!currentUser) return;
+    if (cart.empty())
+    {
+        cout << "(Your cart is empty)\n\n";
+        return;
+    }
+    double total = 0.0;
+    for (const auto& item : cart)
+    {
+        for (auto& store : stores)
+        {
+            for (auto& p : store.products)
+            {
+                if (p.productName == item.productName)
+                {
+                    if (item.quantity > p.quantity)
+                    {
+                        cout << "(Error) Insufficient stock for " << p.productName << "\n";
+                    }
+                    else
+                    {
+                        p.quantity -= item.quantity;
+                        total += item.price * item.quantity;
+                    }
+                    break;
+                }
+            }
+        }
+    }
+    currentUser->recordSpending(total);
+    cout << "Purchase complete! Total: $" << total << "\n\n";
+    clearCart();
+}
+
 // Displays a clean ASCII table of staff roster
-// Beginner-friendly: uses setw to align columns and draws simple box
 void displayRosterTable(const vector<string>& staff)
 {
     const int width = 30;
-    // Top border
     cout << '+' << string(width, '-') << '+' << '\n';
     cout << "| " << left << setw(width - 2) << "Current Staff Roster" << " |" << '\n';
     cout << '+' << string(width, '-') << '+' << '\n';
-    // Header row
     cout << "| " << left << setw(width - 2) << "Name" << " |" << '\n';
     cout << '+' << string(width, '-') << '+' << '\n';
-    // Each staff
     for (const auto& s : staff)
     {
-        // Print name row
         cout << "| " << left << setw(width - 2) << s << " |" << '\n';
     }
-    // Bottom border
     cout << '+' << string(width, '-') << '+' << endl;
 }
 
@@ -406,7 +360,7 @@ void manageRoster(vector<string>& staff)
         cout << endl;
         switch (choice)
         {
-        case '1': // Add staff
+        case '1':
         {
             cout << "Enter new staff name: ";
             string name; getline(cin, name);
@@ -414,18 +368,15 @@ void manageRoster(vector<string>& staff)
                 cout << "(Error) Name cannot be empty." << endl;
             else
             {
-                staff.push_back(name); // Add to list
+                staff.push_back(name);
                 cout << "Added: " << name << endl;
             }
             cout << "\nPress any key to continue...";
             _getch();
         } break;
-        case '2': // Delete staff
+        case '2':
         {
-            if (staff.empty())
-            {
-                cout << "(Error) No staff to delete." << endl;
-            }
+            if (staff.empty()) cout << "(Error) No staff to delete." << endl;
             else
             {
                 cout << "Select staff to delete:" << endl;
@@ -445,15 +396,14 @@ void manageRoster(vector<string>& staff)
             cout << "\nPress any key to continue...";
             _getch();
         } break;
-        case '3': // Show roster table
+        case '3':
         {
             system("cls");
-            // Display the roster as a table
             displayRosterTable(staff);
             cout << "\nPress any key to continue...";
             _getch();
         } break;
-        case '4': // Placeholder for future functions
+        case '4':
         {
             system("cls");
             printStrongBorder("Roster Staff Functions");
@@ -461,7 +411,7 @@ void manageRoster(vector<string>& staff)
             cout << "\nPress any key to continue...";
             _getch();
         } break;
-        case '5': // Back
+        case '5':
             break;
         default:
             cout << "(Error) Invalid input." << endl;
@@ -492,7 +442,6 @@ int main()
 
     mainMenu(users, stores);          // Launch main menu loop
 
-    saveAllStores(stores);            // Save stores on exit
     saveAllUsers(users);              // Save users on exit
     return 0;
 }
@@ -506,7 +455,7 @@ void createStoreFiles()
         if (!fileExists(fn))
         {
             cout << "Created: " << fn << endl;
-            ofstream f(fn); // Create empty file
+            ofstream f(fn);
             if (f.is_open()) f.close();
             else cout << "(Error) Could not create file: " << fn << endl;
         }
@@ -530,22 +479,13 @@ void loadAllStores(vector<Store>& stores)
     {
         Store s;
         s.storeLocation = locations[i];
-        s.loadProcutsFromFile(filenames[i]);
+        s.loadProductsFromFile(filenames[i]);
         stores.push_back(s);
     }
 }
 
-void saveAllStores(vector<Store>& stores)
-{
-    for (const Store& s : stores)
-    {
-        string filename = s.storeLocation + ".txt";
-        s.saveProductsToFile(filename);
-    }
-}
-
 // Displays details for a selected store
-void dispalyStoreDetails(const Store& store)
+void displayStoreDetails(const Store& store)
 {
     system("cls");
     printStrongBorder("Store Details");
@@ -608,8 +548,7 @@ void loadAllUsers(vector<User>& users)
         while (getline(f, line))
         {
             User u;
-            if (u.loadFromLine(line))
-                users.push_back(u);
+            if (u.loadFromLine(line)) users.push_back(u);
         }
         f.close();
     }
@@ -643,11 +582,12 @@ void mainMenu(vector<User>& users, vector<Store>& stores)
             {
                 idx = selectStoreMenu(stores);
                 if (idx < 0) break;
-                dispalyStoreDetails(stores[idx]);
+                displayStoreDetails(stores[idx]);
                 cout << "\nPress any key to continue...";
                 _getch();
             } while (true);
         } break;
+
         case '2': // Customer login flow
         {
             bool loggedIn = false;
@@ -655,16 +595,18 @@ void mainMenu(vector<User>& users, vector<Store>& stores)
             while (loggedIn)
                 if (!userMenu(users, stores, loggedIn)) break;
         } break;
+
         case '3': // Admin login flow
             adminMenu(users, stores);
             break;
+
         case '4':
             cout << "Exiting Program!" << endl;
             break;
+
         default:
             system("cls");
             cout << "(Error) Invalid input." << endl;
-            break;
         }
     } while (op != '4');
 }
@@ -676,38 +618,82 @@ bool userMenu(vector<User>& users, vector<Store>& stores, bool& loggedIn)
     do
     {
         system("cls"); printStrongBorder("User Menu");
-        printMenuOption("1. Store"); printMenuOption("2. Account"); printMenuOption("3. Sign out");
+        printMenuOption("1. Store");
+        printMenuOption("2. View Cart");
+        printMenuOption("3. Purchase Cart");
+        printMenuOption("4. Account");
+        printMenuOption("5. Sign out");
         cout << string(30, '#') << endl;
         cout << "Option: "; cin >> o;
         cout << endl;
         switch (o)
         {
-        case '1': // View stores
+        case '1': // View/browse stores
         {
             int idx;
             do
             {
                 idx = selectStoreMenu(stores);
                 if (idx < 0) break;
-                dispalyStoreDetails(stores[idx]);
-                cout << "\nPress any key to continue...";
+                displayStoreDetails(stores[idx]);
+
+                // Search products?
+                cout << "Search products? (y/n): ";
+                char s; cin >> s; cin.ignore();
+                if (s == 'y' || s == 'Y')
+                {
+                    cout << "Enter keyword: ";
+                    string kw; getline(cin, kw);
+                    stores[idx].searchProducts(kw);
+                }
+
+                // Add to cart prompt
+                cout << "Enter product number to add to cart (0 = back): ";
+                int choice; cin >> choice;
+                if (choice > 0 && choice <= static_cast<int>(stores[idx].products.size()))
+                {
+                    cout << "Quantity to add: ";
+                    int qty; cin >> qty;
+                    addToCart(stores[idx].products[choice - 1], qty);
+                    cout << "\nAdded to cart! Press any key to continue...";
+                }
+                else
+                {
+                    cout << "\nPress any key to continue...";
+                }
                 _getch();
             } while (true);
         } break;
-        case '2': // Account details placeholder
-            system("cls"); printStrongBorder("Account Details");
-            cout << "Feature coming soon!" << endl;
-            cout << "\nPress any key to continue...";
+
+        case '2': // View Cart
+            displayCart();
+            cout << "Press any key to continue...";
             _getch();
             break;
-        case '3': // Sign out
+
+        case '3': // Purchase Cart
+            purchaseCart(stores);
+            cout << "Press any key to continue...";
+            _getch();
+            break;
+
+        case '4': // Account details / spending summary
+            system("cls"); printStrongBorder("Account Details");
+            if (currentUser) currentUser->viewSummary();
+            cout << "Press any key to continue...";
+            _getch();
+            break;
+
+        case '5': // Sign out
             loggedIn = false;
+            clearCart();  // wipe cart for next session
+            currentUser = nullptr;
             return false;
+
         default:
             cout << "(Error) Invalid input." << endl;
-            break;
         }
-    } while (o != '3');
+    } while (o != '5');
     return false;
 }
 
@@ -736,13 +722,16 @@ void adminMenu(vector<User>& users, vector<Store>& stores)
             }
             else
             {
-                // Initial staff roster (in-memory)
+                currentUser = nullptr; // admin has no spending summary
                 vector<string> staff = { "Alice – Manager","Bob   – Cashier","Charlie – Stock" };
                 char a;
                 do
                 {
                     system("cls"); printStrongBorder("Admin Panel");
-                    printMenuOption("1. View Products"); printMenuOption("2. Manage Roster"); printMenuOption("3. Back");
+                    printMenuOption("1. View Products");
+                    printMenuOption("2. Manage Roster");
+                    printMenuOption("3. Low Stock Alerts");
+                    printMenuOption("4. Back");
                     cout << string(30, '#') << endl;
                     cout << "Option: "; cin >> a; cin.ignore();
                     cout << endl;
@@ -751,56 +740,66 @@ void adminMenu(vector<User>& users, vector<Store>& stores)
                     case '1': // Browse store products
                     {
                         int idx;
-                        char editOption;
                         do
                         {
                             idx = selectStoreMenu(stores);
                             if (idx < 0) break;
-                            dispalyStoreDetails(stores[idx]);
+                            displayStoreDetails(stores[idx]);
 
-                            cout << "1. Edit Products" << endl;
-                            cout << "2. Back" << endl;
-                            cout << "Option : ";
-                            cin >> editOption;
-                            cout << endl;
-                            cin.ignore();
-
-                            switch (editOption)
+                            cout << "Enter product number to add to cart (0 = back): ";
+                            int choice; cin >> choice;
+                            if (choice > 0 && choice <= static_cast<int>(stores[idx].products.size()))
                             {
-                            case '1':
+                                cout << "Quantity to add: ";
+                                int qty; cin >> qty;
+                                addToCart(stores[idx].products[choice - 1], qty);
+                                cout << "\nAdded to cart! Press any key to continue...";
+                            }
+                            else
                             {
-                                stores[idx].manageProducts();
+                                cout << "\nPress any key to continue...";
                             }
-                            case '2':
-                            {
-                                return;
-                            }
-                            default:
-                                cout << "(Error) Invalid input." << endl;
-                                _getch();
-                                break;
-                            }
-                        } while (editOption != '2');
-                        break;
-                    }
+                            _getch();
+                        } while (true);
+                    } break;
                     case '2': // Manage staff roster
                         manageRoster(staff);
                         break;
-                    case '3': // Back to main menu
+                    case '3': // Low stock notification
+                        system("cls"); printStrongBorder("Low Stock Alerts");
+                        for (const auto& store : stores)
+                        {
+                            cout << "Store: " << store.storeLocation << endl;
+                            bool any = false;
+                            int idx = 1;
+                            for (const auto& p : store.products)
+                            {
+                                if (p.quantity < 5)
+                                {
+                                    cout << idx << ". " << p.productName << " (Stock: " << p.quantity << ")\n";
+                                    any = true;
+                                }
+                                idx++;
+                            }
+                            if (!any) cout << "All items above threshold." << endl;
+                            cout << endl;
+                        }
+                        cout << "Press any key to continue...";
+                        _getch();
+                        break;
+                    case '4': // Back to main menu
                         break;
                     default:
                         cout << "(Error) Invalid input." << endl;
                         _getch();
-                        break;
                     }
-                } while (a != '3');
+                } while (a != '4');
             }
             break;
         case '2': // Back to main menu
             break;
         default:
             system("cls"); cout << "(Error) Invalid input." << endl;
-            break;
         }
     } while (c != '2');
 }
@@ -831,6 +830,7 @@ void userLogin(vector<User>& users, bool& loggedIn)
                     system("cls");
                     cout << "Welcome back, " << x.name << "!" << endl;
                     loggedIn = true;
+                    currentUser = &x;
                     found = true;
                     return;
                 }
@@ -844,7 +844,7 @@ void userLogin(vector<User>& users, bool& loggedIn)
         } break;
         case '2': // Registration flow
         {
-            User nu; // nu = New User
+            User nu;
             string uname;
             bool ex;
             do
@@ -865,7 +865,6 @@ void userLogin(vector<User>& users, bool& loggedIn)
             return;
         default:
             cout << "(Error) Invalid input." << endl;
-            break;
         }
     } while (o != '3');
 }

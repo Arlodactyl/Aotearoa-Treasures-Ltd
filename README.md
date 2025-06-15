@@ -6,20 +6,25 @@ This repository contains the source code for the **Aotearoa Treasures Inventory 
 
 ---
 
-## Features
+#Admin Access# as of 150/06
 
-### Admin Functionality
-- View inventory levels across all stores
-- See alerts for items with fewer than five units in stock
-- Add, edit, or delete products
+- Login with hard-coded credentials (ADMIN/PASSWORD)
+- Browse store products (select a store, view product list)
+- Manage Roster submenu
+- Add Staff
+- Delete Staff
+- Show All Staff Scheduled (formatted table)
+- Roster Staff Functions (placeholder)
+-Back out to main menu
 
+#Customer Access as of 15/06
 
-### Customer Functionality
-- Select a store to shop from
-- View available products
-- Make purchases (automatically updates store-specific inventory)
-
----
+-Register a new account or sign in with username/password
+-Browse store products (select a store, view numbered product list)
+-Add items to cart by product number and quantity
+-View Cart (see itemized list, subtotals, and total)
+-Account Details placeholder (future feature)
+-Sign out (which also clears the cart)
 
 ## Technologies Used
 

@@ -1,4 +1,4 @@
-// Aotearoa_Treasures_Ltd_Menu.cpp : This file contains the 'main' function. Program execution begins and ends there.
+// Main.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
 #include <iostream>
@@ -105,9 +105,15 @@ struct Store
             cout << "4. Back" << endl;
 
             cout << "Option : ";
-            cin >> option;
+
+            // Input validation 
+            option = cin.get(); // Reads one character
+            char check = cin.get(); // Reads the next character (If there is any)
+            // Clearing extra input (When user types more than 2 characters
+            while (check != '\n' && check != EOF) { check = cin.get(); }
+            if (check != '\n' || option < '1' || option > '4') { system("cls"); cout << "(Error) Invalid input." << endl; continue; }
+
             cout << endl;
-            cin.ignore();
 
             switch (option)
             {
@@ -152,7 +158,14 @@ struct Store
                             cout << "4. Back" << endl;
 
                             cout << "Option : ";
-                            cin >> option;
+
+                            // Input validation 
+                            o = cin.get(); // Reads one character
+                            char check = cin.get(); // Reads the next character (If there is any)
+                            // Clearing extra input (When user types more than 2 characters
+                            while (check != '\n' && check != EOF) { check = cin.get(); }
+                            if (check != '\n' || o < '1' || o > '4') { system("cls"); cout << "(Error) Invalid input." << endl; continue; }
+
                             cout << endl;
 
                             switch (option)
@@ -221,7 +234,7 @@ struct Store
                         cin >> strCheck;
                         cout << endl;
 
-                        transform(strCheck.begin(), strCheck.end(), strCheck.begin(), ::tolower);
+                        transform(strCheck.begin(), strCheck.end(), strCheck.begin(), ::tolower); // Transforming User Input To lower characters 
 
                         while (strCheck != "yes" && strCheck != "no")
                         {
@@ -318,6 +331,12 @@ public:
     {
         cout << "Enter a Password: ";
         getline(cin, password);
+        while (password == "\0")
+        {
+            cout << "Invalid, Try again\n" << endl;
+            cout << "Enter a Password: "; getline(cin, password);
+            cout << endl;
+        }
         while (password == username)
         {
             cout << "(Error) Password cannot match username." << endl;
@@ -331,10 +350,24 @@ public:
     void getInformation()
     {
         cout << "Name: "; getline(cin, name);
+        while (name == "\0")
+        {
+            cout << "Invalid, Try again\n" << endl;
+            cout << "Enter a Name: "; getline(cin, name);
+            cout << endl;
+        }
         cout << "Surname: "; getline(cin, surname);
+        while (surname == "\0")
+        {
+            cout << "Invalid, Try again\n" << endl;
+            cout << "Enter a Surname: "; getline(cin, surname);
+            cout << endl;
+        }
         cout << "Age: ";
+
         while (true)
         {
+
             cin >> age;
             if (cin.fail() || age < 5 || age > 120)
             {
@@ -351,7 +384,10 @@ public:
         cout << endl;
     }
 
-    void setUsername(const string& u) { username = u; }
+    void setUsername(const string& u)
+    {
+        username = u;
+    }
     string getUsername() const { return username; }
     bool checkPassword(const string& p) const { return p == password; }
 
@@ -535,7 +571,7 @@ void displayRosterTable(const vector<string>& staff)
     cout << '+' << string(width, '-') << '+' << endl;
 }
 
-// Roster management submenu for Admin
+// Roster management submenu for Admin /// Has input validation
 void manageRoster(vector<string>& staff)
 {
     char choice;
@@ -549,8 +585,15 @@ void manageRoster(vector<string>& staff)
         printMenuOption("4. Roster Staff Functions");
         printMenuOption("5. Back");
         cout << string(30, '#') << endl;
-        cout << "Option: "; cin >> choice;
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "Option: ";
+
+        // Input validation 
+        choice = cin.get(); // Reads one character
+        char check = cin.get(); // Reads the next character (If there is any)
+        // Clearing extra input (When user types more than 2 characters
+        while (check != '\n' && check != EOF) { check = cin.get(); }
+        if (check != '\n' || choice < '1' || choice > '5') { system("cls"); cout << "(Error) Invalid input." << endl; }
+
         cout << endl;
         switch (choice)
         {
@@ -700,7 +743,7 @@ void displayStoreDetails(const Store& store)
     cout << endl;
 }
 
-// Menu for selecting which store to browse
+// Menu for selecting which store to browse                         /// Has input validation
 int selectStoreMenu(const vector<Store>& stores)
 {
     system("cls");
@@ -710,7 +753,15 @@ int selectStoreMenu(const vector<Store>& stores)
     printMenuOption("4. Back");
     cout << string(30, '#') << endl;
     cout << "Option: ";
-    char opt; cin >> opt;
+    char opt;
+
+    // Input validation 
+    opt = cin.get(); // Reads one character
+    char check = cin.get(); // Reads the next character (If there is any)
+    // Clearing extra input (When user types more than 2 characters
+    while (check != '\n' && check != EOF) { check = cin.get(); }
+    if (check != '\n' || opt < '1' || opt > '4') { system("cls"); cout << "(Error) Invalid input." << endl; }
+
     cout << endl;
     switch (opt)
     {
@@ -763,7 +814,7 @@ void loadAllUsers(vector<User>& users)
     }
 }
 
-// Main menu shown at startup
+// Main menu shown at startup                                       /// Has input validation
 void mainMenu(vector<User>& users, vector<Store>& stores)
 {
     char op;
@@ -776,7 +827,15 @@ void mainMenu(vector<User>& users, vector<Store>& stores)
         printMenuOption("3. Admin Login");
         printMenuOption("4. Exit");
         cout << string(30, '#') << endl;
-        cout << "Option: "; cin >> op;
+        cout << "Option: ";
+
+        // Input validation 
+        op = cin.get(); // Reads one character
+        char check = cin.get(); // Reads the next character (If there is any)
+        // Clearing extra input (When user types more than 2 characters
+        while (check != '\n' && check != EOF) { check = cin.get(); }
+        if (check != '\n' || op < '1' || op > '4') { system("cls"); cout << "(Error) Invalid input." << endl; }
+
         cout << endl;
         switch (op)
         {
@@ -816,7 +875,7 @@ void mainMenu(vector<User>& users, vector<Store>& stores)
     } while (op != '4');
 }
 
-// Customer menu after successful login
+// Customer menu after successful login                             /// Has input validation
 bool userMenu(vector<User>& users, vector<Store>& stores, bool& loggedIn)
 {
     char o;
@@ -829,7 +888,15 @@ bool userMenu(vector<User>& users, vector<Store>& stores, bool& loggedIn)
         printMenuOption("4. Account");
         printMenuOption("5. Sign out");
         cout << string(30, '#') << endl;
-        cout << "Option: "; cin >> o;
+        cout << "Option: ";
+
+        // Input validation 
+        o = cin.get(); // Reads one character
+        char check = cin.get(); // Reads the next character (If there is any)
+        // Clearing extra input (When user types more than 2 characters
+        while (check != '\n' && check != EOF) { check = cin.get(); }
+        if (check != '\n' || o < '1' || o > '5') { system("cls"); cout << "(Error) Invalid input." << endl; continue; }
+
         cout << endl;
         switch (o)
         {
@@ -902,7 +969,7 @@ bool userMenu(vector<User>& users, vector<Store>& stores, bool& loggedIn)
     return false;
 }
 
-// Admin menu: login then admin panel
+// Admin menu: login then admin panel                               /// Has input valdation
 void adminMenu(vector<User>& users, vector<Store>& stores)
 {
     char c;
@@ -912,7 +979,15 @@ void adminMenu(vector<User>& users, vector<Store>& stores)
         system("cls"); printStrongBorder("Admin Login");
         printMenuOption("1. Login"); printMenuOption("2. Back");
         cout << string(30, '#') << endl;
-        cout << "Option: "; cin >> c; cin.ignore();
+        cout << "Option: ";
+
+        // Input validation 
+        c = cin.get(); // Reads one character
+        char check = cin.get(); // Reads the next character (If there is any)
+        // Clearing extra input (When user types more than 2 characters
+        while (check != '\n' && check != EOF) { check = cin.get(); }
+        if (check != '\n' || c < '1' || c > '2') { system("cls"); cout << "(Error) Invalid input." << endl; continue; }
+
         cout << endl;
         switch (c)
         {
@@ -938,7 +1013,15 @@ void adminMenu(vector<User>& users, vector<Store>& stores)
                     printMenuOption("3. Low Stock Alerts");
                     printMenuOption("4. Back");
                     cout << string(30, '#') << endl;
-                    cout << "Option: "; cin >> a; cin.ignore();
+                    cout << "Option: ";
+
+                    // Input validation 
+                    a = cin.get(); // Reads one character
+                    char check = cin.get(); // Reads the next character (If there is any)
+                    // Clearing extra input (When user types more than 2 characters
+                    while (check != '\n' && check != EOF) { check = cin.get(); }
+                    if (check != '\n' || a < '1' || a > '4') { system("cls"); cout << "(Error) Invalid input." << endl; continue; }
+
                     cout << endl;
                     switch (a)
                     {
@@ -956,9 +1039,15 @@ void adminMenu(vector<User>& users, vector<Store>& stores)
                             cout << "1. Edit Products" << endl;
                             cout << "2. Back" << endl;
                             cout << "Option : ";
-                            cin >> o;
+
+                            // Input validation 
+                            o = cin.get(); // Reads one character
+                            char check = cin.get(); // Reads the next character (If there is any)
+                            // Clearing extra input (When user types more than 2 characters
+                            while (check != '\n' && check != EOF) { check = cin.get(); }
+                            if (check != '\n' || o < '1' || o > '2') { system("cls"); cout << "(Error) Invalid input." << endl; continue; }
+
                             cout << endl;
-                            cin.ignore();
 
                             switch (o)
                             {
@@ -1019,7 +1108,7 @@ void adminMenu(vector<User>& users, vector<Store>& stores)
     } while (c != '2');
 }
 
-// Customer login and registration menu
+// Customer login and registration menu                             /// Has Input validation
 void userLogin(vector<User>& users, bool& loggedIn)
 {
     char o;
@@ -1028,8 +1117,17 @@ void userLogin(vector<User>& users, bool& loggedIn)
         system("cls"); printStrongBorder("Customer Login");
         printMenuOption("1. Sign In"); printMenuOption("2. Register An Account"); printMenuOption("3. Back");
         cout << string(35, '#') << endl;
-        cout << "Option: "; cin >> o; cin.ignore();
+        cout << "Option: ";
+
+        // Input validation 
+        o = cin.get(); // Reads one character
+        char check = cin.get(); // Reads the next character (If there is any)
+        // Clearing extra input (When user types more than 2 characters
+        while (check != '\n' && check != EOF) { check = cin.get(); }
+        if (check != '\n' || o < '1' || o > '3') { system("cls"); cout << "(Error) Invalid input." << endl; continue; }
+
         cout << endl;
+
         switch (o)
         {
         case '1': // Sign in flow
@@ -1065,6 +1163,12 @@ void userLogin(vector<User>& users, bool& loggedIn)
             do
             {
                 cout << "Enter a Username: "; getline(cin, uname);
+                while (uname == "\0")
+                {
+                    cout << "Invalid, Try again\n" << endl;
+                    cout << "Enter a Username: "; getline(cin, uname);
+                    cout << endl;
+                }
                 ex = usernameExists(users, uname);
                 if (ex) cout << "(Error) Username taken." << endl;
             } while (ex);
@@ -1080,6 +1184,7 @@ void userLogin(vector<User>& users, bool& loggedIn)
             return;
         default:
             cout << "(Error) Invalid input." << endl;
+            break;
         }
     } while (o != '3');
 }

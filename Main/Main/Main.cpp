@@ -455,9 +455,7 @@ void printMenuOption(const string& opt);
 void addToCart(const Product& p, int qty);
 void displayCart();
 void clearCart();
-
-void staffMenu(vector<Store>& stores); // Working on...
-
+void staffMenu(vector<Store>& stores);
 void purchaseCart(vector<Store>& stores);
 void displayWeeklyRoster(const Store& store);            // display full weekly roster for a store
 void manageRoster(Store& store);                         // manage staff and schedules for a store
@@ -564,7 +562,7 @@ void purchaseCart(vector<Store>& stores)
     clearCart();
 }
 
-// Displays the weekly roster: days and staff with their hours  /Removed const
+// Displays the weekly roster: days and staff with their hours  
 void displayWeeklyRoster(Store& store)
 {
     system("cls");
@@ -864,7 +862,7 @@ void displayStoreDetails(const Store& store)
     cout << endl;
 }
 
-// Menu for selecting which store to browse                         /// Has input validation
+// Menu for selecting which store to browse                         
 int selectStoreMenu(const vector<Store>& stores)
 {
     system("cls");
@@ -930,7 +928,7 @@ void loadAllUsers(vector<User>& users)
     }
 }
 
-// Main menu shown at startup                                       /// Has input validation
+// Main menu shown at startup                                       
 void mainMenu(vector<User>& users, vector<Store>& stores)
 {
     char op;
@@ -956,44 +954,109 @@ void mainMenu(vector<User>& users, vector<Store>& stores)
         {
         case '1': // Browse stores without login
         {
+            User guestUser;
+            currentUser = &guestUser;
+            bool guestActive = true;
+            clearCart();
+
             int idx;
             do
             {
                 idx = selectStoreMenu(stores);
                 if (idx < 0) break;
-                displayStoreDetails(stores[idx]);
-                // Search products?
-                cout << "Search products? (y/n): ";
-                char s;
 
-                s = cin.get();
-                char check = cin.get();
-                while (check != '\n' && check != EOF) { check = cin.get(); }
-                if (check != '\n' || s < 'y' || s > 'n') { system("cls"); cout << "(Error) Invalid input." << endl; continue; }
+                bool inStore = true;
 
-                if (s == 'y' || s == 'Y')
+                while (inStore)
                 {
-                    cout << "Enter keyword: ";
-                    string kw; getline(cin, kw);
-                    stores[idx].searchProducts(kw);
-                }
+                    displayStoreDetails(stores[idx]);
 
-                // Add to cart prompt
-                cout << "Enter product number to add to cart (0 = back): ";
-                int choice; cin >> choice;
-                if (choice > 0 && choice <= static_cast<int>(stores[idx].products.size()))
-                {
-                    cout << "Quantity to add: ";
-                    int qty; cin >> qty;
-                    addToCart(stores[idx].products[choice - 1], qty);
-                    cout << "\nAdded to cart! Press any key to continue...";
+                    // Search products?
+                    cout << "1. Search products " << endl;
+                    cout << "2. View Cart" << endl;
+                    cout << "3. Purchase Cart" << endl;
+                    cout << "4. Back" << endl;
+                    char s;
+
+                    s = cin.get();
+                    char check = cin.get();
+                    while (check != '\n' && check != EOF) { check = cin.get(); }
+                    if (check != '\n' || s != '1' && s != '2' && s != '3' && s != '4') { system("cls"); cout << "(Error) Invalid input." << endl; continue; }
+
+                    switch (s)
+                    {
+                    case '1':
+                    {
+                        cout << "Enter product name you would like:" << endl;
+                        cout << "Product: ";
+                        string kw;
+                        getline(cin, kw);
+
+                        stores[idx].searchProducts(kw);
+
+                        cout << "\nDo you want to add the product to the cart? (y/n): ";
+                        char o;
+                        cin >> o;
+                        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+                        if (o == 'y' || o == 'Y')
+                        {
+                            cout << "Enter product number to add to cart (0 = back): ";
+                            int choice;
+                            cin >> choice;
+                            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+                            if (choice > 0 && choice <= static_cast<int>(stores[idx].products.size()))
+                            {
+                                cout << "Quantity to add: ";
+                                int qty;
+                                cin >> qty;
+                                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+                                addToCart(stores[idx].products[choice - 1], qty);
+                                cout << "\nAdded to cart! Press any key to continue...";
+                            }
+                            else
+                            {
+                                cout << "\nInvalid product number. Press any key to continue...";
+                            }
+                        }
+                        else
+                        {
+                            cout << "\nProduct not added. Press any key to continue...";
+                        }
+
+                        _getch();
+                        break;
+                    }
+                    case '2':
+                    {
+                        displayCart();
+                        cout << "Press any key to continue...";
+                        _getch();
+                        break;
+                    }
+                    case '3':
+                    {
+                        purchaseCart(stores);
+
+                        cout << "Press any key to continue...";
+                        _getch();
+                        break;
+                    }
+                    case '4':
+                    {
+                        inStore = false;
+                        break;
+                    }
+                    default:
+                        break;
+                    }
                 }
-                else
-                {
-                    cout << "\nPress any key to continue...";
-                }
-                _getch();
-            } while (true);
+            } while (guestActive);
+
+            currentUser = nullptr;
+            clearCart();
         } break;
         case '2': // Customer login flow
         {
@@ -1054,7 +1117,7 @@ bool userMenu(vector<User>& users, vector<Store>& stores, bool& loggedIn)
                 char s; s = cin.get();
                 char check = cin.get();
                 while (check != '\n' && check != EOF) { check = cin.get(); }
-                if (check != '\n' || s < 'y' || s > 'n')
+                if (check != '\n' && s != 'y' && s != 'n')
                 {
                     system("cls");
                     cout << "(Error) Invalid input." << endl;
@@ -1120,7 +1183,7 @@ bool userMenu(vector<User>& users, vector<Store>& stores, bool& loggedIn)
     return false;
 }
 
-// Admin menu: login then admin panel                               /// Has input valdation
+// Admin menu: login then admin panel                               
 void adminMenu(vector<User>& users, vector<Store>& stores)
 {
     char c;
@@ -1239,7 +1302,7 @@ void adminMenu(vector<User>& users, vector<Store>& stores)
     } while (c != '2');
 }
 
-// Customer login and registration menu                             /// Has Input validation
+// Customer login and registration menu                             
 void userLogin(vector<User>& users, bool& loggedIn)
 {
     char o;
@@ -1314,11 +1377,12 @@ void userLogin(vector<User>& users, bool& loggedIn)
     } while (o != '3');
 }
 
+// Staff Menu: login then view panel
 void staffMenu(vector<Store>& stores)
 {
     char o;
 
-    system("cls"); printStrongBorder("Admin Login");
+    system("cls"); printStrongBorder("Staff Login");
     printMenuOption("1. Login"); printMenuOption("2. Back");
     cout << string(30, '#') << endl;
     cout << "Option: ";
@@ -1350,7 +1414,7 @@ void staffMenu(vector<Store>& stores)
             cout << "Password : ";
             getline(cin, password);
 
-            if (username != "STAFF" && password != "PASSWORD")
+            if (username != "STAFF" || password != "PASSWORD")
             {
                 system("cls");
                 cout << "Invalid Login...!" << endl;
@@ -1362,6 +1426,7 @@ void staffMenu(vector<Store>& stores)
             system("cls"); printStrongBorder("Staff Roster");
 
             int idx = selectStoreMenu(stores);
+            if (idx < 0) break; // Added (So staff (user) can go back)
             displayWeeklyRoster(stores[idx]);
 
             break;

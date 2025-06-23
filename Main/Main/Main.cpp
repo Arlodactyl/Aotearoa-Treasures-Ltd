@@ -457,8 +457,9 @@ void displayCart();
 void clearCart();
 void staffMenu(vector<Store>& stores);
 void purchaseCart(vector<Store>& stores);
-void displayWeeklyRoster(const Store& store);            // display full weekly roster for a store
-void manageRoster(Store& store);                         // manage staff and schedules for a store
+void displayWeeklyRoster(const Store& store);            // Display full weekly roster for a store
+void manageRoster(Store& store);                         // Manage staff and schedules for a store
+void staffPerStore(vector<Store>& stores);               // Loads staff to stores
 
 // Draws a border and title for menus
 void printStrongBorder(const string& title)
@@ -770,9 +771,6 @@ void manageRoster(Store& store)
             return;
         }
 
-        cout << "\nPress any key to continue...";
-        _getch();
-
     } while (choice != '5');
 }
 
@@ -931,6 +929,7 @@ void loadAllUsers(vector<User>& users)
 // Main menu shown at startup                                       
 void mainMenu(vector<User>& users, vector<Store>& stores)
 {
+    staffPerStore(stores); // Assigning 
     char op;
     do
     {
@@ -1376,8 +1375,7 @@ void userLogin(vector<User>& users, bool& loggedIn)
         }
     } while (o != '3');
 }
-
-// Staff Menu: login then view panel
+// Staff Menu" login then view panel
 void staffMenu(vector<Store>& stores)
 {
     char o;
@@ -1403,35 +1401,35 @@ void staffMenu(vector<Store>& stores)
     {
     case '1':
     {
-        do
+        string username;
+        string password;
+
+        cout << "Username : ";
+        getline(cin, username);
+
+        cout << "Password : ";
+        getline(cin, password);
+
+        if (username != "STAFF" || password != "PASSWORD")
         {
-            string username;
-            string password;
+            system("cls");
+            cout << "Invalid Login...!" << endl;
+            cout << "Press Any Key..." << endl;
+            _getch();
+            break;
+        }
 
-            cout << "Username : ";
-            getline(cin, username);
+        system("cls"); printStrongBorder("Staff Roster");
 
-            cout << "Password : ";
-            getline(cin, password);
-
-            if (username != "STAFF" || password != "PASSWORD")
-            {
-                system("cls");
-                cout << "Invalid Login...!" << endl;
-                cout << "Press Any Key..." << endl;
-                _getch();
-                break;
-            }
-
-            system("cls"); printStrongBorder("Staff Roster");
-
+        while (true)
+        {
             int idx = selectStoreMenu(stores);
             if (idx < 0) break; // Added (So staff (user) can go back)
             displayWeeklyRoster(stores[idx]);
 
-            break;
-        } while (true);
-
+            system("cls");
+            printStrongBorder("Staff Roster");
+        }
         break;
     }
     case '2':
@@ -1441,5 +1439,24 @@ void staffMenu(vector<Store>& stores)
     default:
         cout << "Invalid Input Try agian!\n" << endl;
         break;
+    }
+}
+
+// Preload staff to Stores
+void staffPerStore(vector<Store>& stores)
+{
+    for (auto& store : stores) {
+        if (store.storeLocation == "Christchurch") {
+            store.staffList.push_back({ "Alice", "Smith", { "09:00-17:00", "", "09:00-17:00", "", "", "09:00-17:00", "" } });             // Alice Smith (Monday, Wednesday, Saturday)
+            store.staffList.push_back({ "Bob", "Brown", { "", "22:00-06:00", "", "22:00-06:00", "", "", "22:00-06:00" } });               // Bob Brown (Tuesday, Thursday, Sunday)
+        }
+        else if (store.storeLocation == "Auckland") {
+            store.staffList.push_back({ "Carol", "Jones", { "09:00-17:00", "09:00-17:00", "", "", "09:00-17:00", "", "" } });             // Carol Jones (Monday, Tuesday, Friday)
+            store.staffList.push_back({ "David", "Lee", { "", "", "22:00-06:00", "22:00-06:00", "", "22:00-06:00", "" } });               // David Lee (Wednesday, Thursday, Saturday)
+        }
+        else if (store.storeLocation == "Wellington") {
+            store.staffList.push_back({ "Eve", "Davis", { "09:00-17:00", "", "", "09:00-17:00", "", "09:00-17:00", "" } });               // Eve Davis (Monday, Thursday, Saturday)
+            store.staffList.push_back({ "Frank", "Miller", { "", "22:00-06:00", "22:00-06:00", "", "", "22:00-06:00", "22:00-06:00" } }); // Frank Miller (Tuesday, Wednesday, Saturday, Sunday)
+        }
     }
 }

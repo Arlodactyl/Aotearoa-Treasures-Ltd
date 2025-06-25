@@ -27,6 +27,9 @@ struct StaffMember
     string firstName;            // First name of employee
     string lastName;             // Last name of employee
     vector<string> hours;        // Hours for Monday-Sunday (index 0=Mon)
+
+    string address;              // Employee's Address
+    string contactNumber;        // Contact Info
 };
 
 // Structure Store: holds store location, its product list, and its roster
@@ -109,7 +112,6 @@ struct Store
             char check = cin.get(); // Reads the next character (If there is any)
             // Clearing extra input
             while (check != '\n' && check != EOF) { check = cin.get(); }
-            if (check != '\n' || option < '1' || option > '4') { system("cls"); cout << "(Error) Invalid input." << endl; continue; }
             cout << endl;
             switch (option)
             {
@@ -184,7 +186,7 @@ struct Store
                             o = cin.get();
                             char check2 = cin.get();
                             while (check2 != '\n' && check2 != EOF) { check2 = cin.get(); }
-                            if (check2 != '\n' || o < '1' || o > '4') { system("cls"); cout << "(Error) Invalid input." << endl; continue; }
+                            if (check2 != '\n' && o < '1' && o > '4') { system("cls"); cout << "(Error) Invalid input." << endl; continue; }
                             cout << endl;
                             switch (o)
                             {
@@ -277,7 +279,17 @@ struct Store
                 break;
             }
             case '4': // Back
+            {
                 break;
+            }
+            default:
+            {
+                cout << "(Error) Invalid input." << endl;
+                system("pause");
+                continue;
+                cin.ignore();
+            }
+
             }
         } while (option != '4');
     }
@@ -457,9 +469,9 @@ void displayCart();
 void clearCart();
 void staffMenu(vector<Store>& stores);
 void purchaseCart(vector<Store>& stores);
-void displayWeeklyRoster(const Store& store);            // Display full weekly roster for a store
-void manageRoster(Store& store);                         // Manage staff and schedules for a store
-void staffPerStore(vector<Store>& stores);               // Loads staff to stores
+void displayWeeklyRoster(const Store& store);            // display full weekly roster for a store
+void manageRoster(Store& store);                         // manage staff and schedules for a store
+void staffPerStore(vector<Store>& stores);
 
 // Draws a border and title for menus
 void printStrongBorder(const string& title)
@@ -633,6 +645,11 @@ void manageRoster(Store& store)
             getline(cin, m.firstName);
             cout << "Enter last name: ";
             getline(cin, m.lastName);
+            cout << "Enter Address: ";
+            getline(cin, m.address);
+            cout << "Enter Contact Number: ";
+            getline(cin, m.contactNumber);
+
 
             // shift entry instructions
             cout << "\nFor each day select:\n";
@@ -751,6 +768,9 @@ void manageRoster(Store& store)
                 system("cls");
                 printStrongBorder("Edit Staff Hours - " + store.storeLocation);
                 cout << "Editing hours for " << m.firstName << " " << m.lastName << ":\n";
+                cout << "Contact Details : " << m.contactNumber << endl;
+                cout << "Address : " << m.address << endl;
+
                 cout << "\nFor each day select:\n";
                 cout << " 1 = 09:00-17:00   2 = 22:00-06:00   3 = None  (leave blank to keep current)\n\n";
                 for (int i = 0; i < 7; ++i)
@@ -769,6 +789,9 @@ void manageRoster(Store& store)
         }
         case '5': // Back
             return;
+        default:
+            cout << "(Error) Invalid input." << endl;
+            system("pause");
         }
 
     } while (choice != '5');
@@ -873,7 +896,7 @@ int selectStoreMenu(const vector<Store>& stores)
     char opt = cin.get();
     char check = cin.get();
     while (check != '\n' && check != EOF) { check = cin.get(); }
-    if (check != '\n' || opt < '1' || opt > '4') { system("cls"); cout << "(Error) Invalid input." << endl; return -1; }
+    if (check != '\n' || opt < '1' || opt > '4') { system("cls"); cout << "(Error) Invalid input." << endl; system("pause"); }
     cout << endl;
     switch (opt)
     {
@@ -882,8 +905,6 @@ int selectStoreMenu(const vector<Store>& stores)
     case '3': return 2;
     case '4': return -1;
     default:
-        system("cls");
-        cout << "(Error) Invalid input." << endl;
         return -1;
     }
 }
@@ -946,7 +967,7 @@ void mainMenu(vector<User>& users, vector<Store>& stores)
         op = cin.get();
         char check = cin.get();
         while (check != '\n' && check != EOF) { check = cin.get(); }
-        if (check != '\n' || op < '1' || op > '5') { system("cls"); cout << "(Error) Invalid input." << endl; }
+        if (check != '\n' && op < '1' && op > '5') { system("cls"); cout << "(Error) Invalid input." << endl; }
 
         cout << endl;
         switch (op)
@@ -971,7 +992,7 @@ void mainMenu(vector<User>& users, vector<Store>& stores)
                     displayStoreDetails(stores[idx]);
 
                     // Search products?
-                    cout << "1. Search products " << endl;
+                    cout << "1. Add products " << endl;
                     cout << "2. View Cart" << endl;
                     cout << "3. Purchase Cart" << endl;
                     cout << "4. Back" << endl;
@@ -980,20 +1001,13 @@ void mainMenu(vector<User>& users, vector<Store>& stores)
                     s = cin.get();
                     char check = cin.get();
                     while (check != '\n' && check != EOF) { check = cin.get(); }
-                    if (check != '\n' || s != '1' && s != '2' && s != '3' && s != '4') { system("cls"); cout << "(Error) Invalid input." << endl; continue; }
+                    if (check != '\n' && s < '1' && s > '4') { system("cls"); cout << "(Error) Invalid input." << endl; continue; }
 
                     switch (s)
                     {
                     case '1':
                     {
-                        cout << "Enter product name you would like:" << endl;
-                        cout << "Product: ";
-                        string kw;
-                        getline(cin, kw);
-
-                        stores[idx].searchProducts(kw);
-
-                        cout << "\nDo you want to add the product to the cart? (y/n): ";
+                        cout << "\nAdd product to the cart? (y/n): ";
                         char o;
                         cin >> o;
                         cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -1011,6 +1025,14 @@ void mainMenu(vector<User>& users, vector<Store>& stores)
                                 int qty;
                                 cin >> qty;
                                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+                                while (qty <= 0 || qty > (int)stores[idx].products[choice - 1].quantity)
+                                {
+                                    cout << "\nInvalid quantity. Must be between 1 and " << (int)stores[idx].products[choice - 1].quantity << ".\n";
+                                    cout << "Quantity to add: ";
+                                    cin >> qty;
+
+                                }
 
                                 addToCart(stores[idx].products[choice - 1], qty);
                                 cout << "\nAdded to cart! Press any key to continue...";
@@ -1049,7 +1071,9 @@ void mainMenu(vector<User>& users, vector<Store>& stores)
                         break;
                     }
                     default:
-                        break;
+                        system("cls");
+                        cout << "(Error) Invalid input." << endl;
+                        system("pause");
                     }
                 }
             } while (guestActive);
@@ -1078,6 +1102,7 @@ void mainMenu(vector<User>& users, vector<Store>& stores)
         default:
             system("cls");
             cout << "(Error) Invalid input." << endl;
+            system("pause");
         }
     } while (op != '5');
 }
@@ -1099,7 +1124,7 @@ bool userMenu(vector<User>& users, vector<Store>& stores, bool& loggedIn)
         o = cin.get();
         char check = cin.get();
         while (check != '\n' && check != EOF) { check = cin.get(); }
-        if (check != '\n' || o < '1' || o > '5') { system("cls"); cout << "(Error) Invalid input." << endl; continue; }
+        if (check != '\n' && o < '1' && o > '5') { system("cls"); cout << "(Error) Invalid input." << endl; continue; }
 
         cout << endl;
         switch (o)
@@ -1112,7 +1137,7 @@ bool userMenu(vector<User>& users, vector<Store>& stores, bool& loggedIn)
                 idx = selectStoreMenu(stores);
                 if (idx < 0) break;
                 displayStoreDetails(stores[idx]);
-                cout << "Search products? (y/n): ";
+                cout << "Add products? (y/n): ";
                 char s; s = cin.get();
                 char check = cin.get();
                 while (check != '\n' && check != EOF) { check = cin.get(); }
@@ -1127,18 +1152,22 @@ bool userMenu(vector<User>& users, vector<Store>& stores, bool& loggedIn)
 
                 if (s == 'y' || s == 'Y')
                 {
-                    cout << "Enter keyword: ";
-                    string kw; getline(cin, kw);
-                    stores[idx].searchProducts(kw);
-                }
-                cout << "Enter product number to add to cart (0 = back): ";
-                int choice; cin >> choice; cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                if (choice > 0 && choice <= (int)stores[idx].products.size())
-                {
-                    cout << "Quantity to add: ";
-                    int qty; cin >> qty; cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                    addToCart(stores[idx].products[choice - 1], qty);
-                    cout << "\nAdded to cart! Press any key to continue...";
+                    cout << "Enter product number to add to cart (0 = back): ";
+                    int choice; cin >> choice; cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    if (choice > 0 && choice <= (int)stores[idx].products.size())
+                    {
+                        cout << "Quantity to add: ";
+                        int qty; cin >> qty; cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                        while (qty <= 0 || qty > (int)stores[idx].products[choice - 1].quantity)
+                        {
+                            cout << "\nInvalid quantity. Must be between 1 and " << (int)stores[idx].products[choice - 1].quantity << ".\n";
+                            cout << "Quantity to add: ";
+                            cin >> qty;
+
+                        }
+                        addToCart(stores[idx].products[choice - 1], qty);
+                        cout << "\nAdded to cart! Press any key to continue...";
+                    }
                 }
                 else
                 {
@@ -1175,6 +1204,9 @@ bool userMenu(vector<User>& users, vector<Store>& stores, bool& loggedIn)
 
         default:
             cout << "(Error) Invalid input." << endl;
+            //_getch();
+            system("pause");
+            break;
         }
 
     } while (o != '5');
@@ -1197,7 +1229,7 @@ void adminMenu(vector<User>& users, vector<Store>& stores)
         c = cin.get();
         char check = cin.get();
         while (check != '\n' && check != EOF) { check = cin.get(); }
-        if (check != '\n' || c < '1' || c > '2') { system("cls"); cout << "(Error) Invalid input." << endl; continue; }
+        if (check != '\n' && c < '1' && c > '2') { system("cls"); cout << "(Error) Invalid input." << endl; continue; }
 
         cout << endl;
         switch (c)
@@ -1218,8 +1250,8 @@ void adminMenu(vector<User>& users, vector<Store>& stores)
                 do
                 {
                     system("cls"); printStrongBorder("Admin Panel");
-                    printMenuOption("1. View Products");
-                    printMenuOption("2. Manage Roster");
+                    printMenuOption("1. Manage Products");
+                    printMenuOption("2. Manage Employees");
                     printMenuOption("3. Low Stock Alerts");
                     printMenuOption("4. Back");
                     cout << string(30, '#') << endl;
@@ -1228,7 +1260,7 @@ void adminMenu(vector<User>& users, vector<Store>& stores)
                     a = cin.get();
                     char chk = cin.get();
                     while (chk != '\n' && chk != EOF) { chk = cin.get(); }
-                    if (chk != '\n' || a < '1' || a > '4') { system("cls"); cout << "(Error) Invalid input." << endl; continue; }
+                    if (chk != '\n' && a < '1' && a > '4') { system("cls"); cout << "(Error) Invalid input." << endl; continue; }
 
                     cout << endl;
                     switch (a)
@@ -1248,9 +1280,26 @@ void adminMenu(vector<User>& users, vector<Store>& stores)
                             o = cin.get();
                             char chk2 = cin.get();
                             while (chk2 != '\n' && chk2 != EOF) { chk2 = cin.get(); }
-                            if (chk2 != '\n' || o < '1' || o > '2') { system("cls"); cout << "(Error) Invalid input." << endl; continue; }
+                            if (chk2 != '\n' && o < '1' && o > '2') { system("cls"); cout << "(Error) Invalid input." << endl; continue; }
                             cout << endl;
-                            if (o == '1') stores[idx].manageProducts();
+                            switch (o)
+                            {
+                            case '1':
+                            {
+                                stores[idx].manageProducts();
+                                break;
+                            }
+                            case '2':
+                            {
+                                break;
+                            }
+                            default:
+                            {
+                                cout << "(Error) Invalid input." << endl;
+                                system("pause");
+                                continue;
+                            }
+                            }
                         } while (o != '2');
                     } break;
 
@@ -1290,6 +1339,9 @@ void adminMenu(vector<User>& users, vector<Store>& stores)
 
                     case '4': // Back to main menu
                         break;
+                    default:
+                        cout << "(Error) Invalid input." << endl;
+                        system("pause");
                     }
                 } while (a != '4');
             }
@@ -1297,7 +1349,11 @@ void adminMenu(vector<User>& users, vector<Store>& stores)
 
         case '2': // Back to main menu
             break;
+        default:
+            cout << "(Error) Invalid input." << endl;
+            system("pause");
         }
+
     } while (c != '2');
 }
 
@@ -1315,7 +1371,7 @@ void userLogin(vector<User>& users, bool& loggedIn)
         o = cin.get();
         char check = cin.get();
         while (check != '\n' && check != EOF) { check = cin.get(); }
-        if (check != '\n' || o < '1' || o > '3') { system("cls"); cout << "(Error) Invalid input." << endl; continue; }
+        if (check != '\n' && o < '1' && o > '3') { system("cls"); cout << "(Error) Invalid input." << endl; continue; }
 
         cout << endl;
         switch (o)
@@ -1372,10 +1428,14 @@ void userLogin(vector<User>& users, bool& loggedIn)
         } break;
         case '3': // Back to main menu
             return;
+        default:
+            cout << "(Error) Invalid input." << endl;
+            system("pause");
+            break;
         }
     } while (o != '3');
 }
-// Staff Menu" login then view panel
+
 void staffMenu(vector<Store>& stores)
 {
     char o;
@@ -1388,13 +1448,6 @@ void staffMenu(vector<Store>& stores)
     o = cin.get();
     char check = cin.get();
     while (check != '\n' && check != EOF) { check = cin.get(); }
-    if (check != '\n' || o < '1' || o > '2')
-    {
-        system("cls");
-        cout << "(Error) Invalid input." << endl;
-        cout << "Press any key...";
-        _getch();
-    }
 
 
     switch (o)
@@ -1438,25 +1491,24 @@ void staffMenu(vector<Store>& stores)
     }
     default:
         cout << "Invalid Input Try agian!\n" << endl;
-        break;
+        system("pause");
     }
 }
 
-// Preload staff to Stores
 void staffPerStore(vector<Store>& stores)
 {
     for (auto& store : stores) {
         if (store.storeLocation == "Christchurch") {
-            store.staffList.push_back({ "Alice", "Smith", { "09:00-17:00", "", "09:00-17:00", "", "", "09:00-17:00", "" } });             // Alice Smith (Monday, Wednesday, Saturday)
-            store.staffList.push_back({ "Bob", "Brown", { "", "22:00-06:00", "", "22:00-06:00", "", "", "22:00-06:00" } });               // Bob Brown (Tuesday, Thursday, Sunday)
+            store.staffList.push_back({ "Alice", "Smith", { "09:00-17:00", "", "09:00-17:00", "", "", "09:00-17:00", "" }, "Christchurch Central", "022-123-3456" });
+            store.staffList.push_back({ "Bob", "Brown", { "", "22:00-06:00", "", "22:00-06:00", "", "", "22:00-06:00" }, "Christchurch Central", "021-987-7654" });
         }
         else if (store.storeLocation == "Auckland") {
-            store.staffList.push_back({ "Carol", "Jones", { "09:00-17:00", "09:00-17:00", "", "", "09:00-17:00", "", "" } });             // Carol Jones (Monday, Tuesday, Friday)
-            store.staffList.push_back({ "David", "Lee", { "", "", "22:00-06:00", "22:00-06:00", "", "22:00-06:00", "" } });               // David Lee (Wednesday, Thursday, Saturday)
+            store.staffList.push_back({ "Carol", "Jones", { "09:00-17:00", "09:00-17:00", "", "", "09:00-17:00", "", "" }, "Auckland Central", "021-567-8910" });
+            store.staffList.push_back({ "David", "Lee", { "", "", "22:00-06:00", "22:00-06:00", "", "22:00-06:00", "" }, "Auckland Central", "021-321-0987" });
         }
         else if (store.storeLocation == "Wellington") {
-            store.staffList.push_back({ "Eve", "Davis", { "09:00-17:00", "", "", "09:00-17:00", "", "09:00-17:00", "" } });               // Eve Davis (Monday, Thursday, Saturday)
-            store.staffList.push_back({ "Frank", "Miller", { "", "22:00-06:00", "22:00-06:00", "", "", "22:00-06:00", "22:00-06:00" } }); // Frank Miller (Tuesday, Wednesday, Saturday, Sunday)
+            store.staffList.push_back({ "Eve", "Davis", { "09:00-17:00", "", "", "09:00-17:00", "", "09:00-17:00", "" }, "Wellington Central", "022-234-5678" });
+            store.staffList.push_back({ "Frank", "Miller", { "", "22:00-06:00", "22:00-06:00", "", "", "22:00-06:00", "22:00-06:00" }, "Wellington Central", "022-765-4321" });
         }
     }
 }

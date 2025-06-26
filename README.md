@@ -1,71 +1,51 @@
-# Aotearoa Treasures Inventory Management System
-## Project by Arleia, Bailey, Oskar
-## Overview
 
-This repository contains the source code for the **Aotearoa Treasures Inventory Management System**, a C++ application developed for Aotearoa Treasures Ltd. The system is designed to help manage inventory levels and customer purchases across three physical stores: Wellington CBD, Christchurch, and Auckland.
+==Aotearoa Treasures Inventory Management System==
+#Project by Arleia, Bailey, Oskar
 
----
+# Overview
+The Aotearoa Treasures Inventory Management System is a C++ application developed for Aotearoa Treasures Ltd. It is designed to manage inventory and customer purchases across three store locations: Wellington CBD, Christchurch, and Auckland. The program features separate access modes for Admins and Customers, each with tailored functionality.
 
-#Admin Access# as of 150/06
+#Admin Features (as of 15/06)
+#Login using hard-coded credentials (ADMIN / PASSWORD) + STAFF / PASSWORD )
+#Browse store products by selecting a store
 
-- Login with hard-coded credentials (ADMIN/PASSWORD)
-- Browse store products (select a store, view product list)
-- Manage Roster submenu
-- Add Staff
-- Delete Staff
-- Show All Staff Scheduled (formatted table)
-- Roster Staff Functions (placeholder)
--Back out to main menu
+#Access the Manage Roster submenu:
+-Add Staff
+-Delete Staff
+- Show All Staff Scheduled (displayed in a formatted table)
+- Roster Staff Functions (placeholder for future expansion)
+- View low-stock alerts for any products with fewer than 5 units
+- Return to main menu
 
-#Customer Access as of 15/06
+#Customer Features 
+- Register a new account or sign in using a username and password
+- Browse products by store location
+- Add products to the cart by selecting product number and quantity
+- View the shopping cart, including an itemized list, subtotals, and total
+- Purchase products, which updates inventory and tracks user spending
+- View spending summary through the account section
+- Sign out, which clears the current cart
 
--Register a new account or sign in with username/password
--Browse store products (select a store, view numbered product list)
--Add items to cart by product number and quantity
--View Cart (see itemized list, subtotals, and total)
--Account Details placeholder (future feature)
--Sign out (which also clears the cart)
+#Technologies Used
+Language: C++
+-Development Environment: Visual Studio Community 2022
+- Version Control: Git and GitHub
+-Project Management: Trello
 
-## Technologies Used
+#Completed Features
+Persistent cart functionality was implemented using a global vector to allow users to accumulate multiple items before checkout. The purchaseCart function deducts purchased items from stock, calculates the total price, updates the user’s cumulative spend, and then clears the cart.
+#Store searching is supported through a keyword-based search function within each store's inventory. After logging in, users can view a summary of their total spending using the viewSummary function.
+#Admins can access a Low Stock Alerts option to identify items with stock levels below five. All input values are validated to prevent negative or zero quantities. Age input during user registration is also validated to be within a logical range (5 to 120).
 
-- **Language:** C++
-- **Development Tools:** Visual Studio Community 2022
-- **Version Control:** Git & GitHub
-- **Project Management:** Trello
+#Completed Task List
+-Cart supports multiple items (completed by Arleia)
+-Users can purchase products and update store inventory
+-Search function allows keyword-based queries within a store
+-Users can view a summary of their total spending
+- Admin panel includes a stock notification system
+- Input validation prevents negative or invalid entries
 
----
-
-## Todo
-
-- Add a cart for user and its able to store multiple purchases (DONE - ARLEIA)
-- User is able to purchase a product from the store
-- User is able to search for a product within the selected store, exp.(Search function in [Struct] store)
-- User is able to view a summary of there spending, exp.(view summary function in [Struct] User)
-- Add a notifaction feature inside admin menu (To see all stock below values of 5)
-- System shouldn't be able to see any negative values
-  
-- Bailey - "I think thats all thats left really, can discuss on Monday"
------ Arleia 
-- Persistent cart with multiple items
-The global vector<CartItem> cart plus addToCart() lets a user accumulate as many different products (and quantities) as they like before checkout.
-Purchasing products
-purchaseCart() deducts each item from stock, totals up the price, records it in the current user’s totalSpent, and clears the cart.
-In-store search
-Store::searchProducts(keyword) scans the selected store’s product list and displays any matches.
-Viewing spending summary
-After login you can choose “Account” to call User::viewSummary(), which prints the user’s cumulative spend.
-Admin low-stock notifications
-In the Admin Panel, option 3 “Low Stock Alerts” walks every store’s inventory and lists anything below 5 units.
-No negative inputs
-addToCart() rejects zero or negative quantities.
-User::getInformation() validates age to be between 5 and 120.
-purchaseCart() checks available stock before deducting so you can’t go negative.
-
-
-
-
-
-
-
+#Final Notes
+The system is now fully functional with all core features implemented. The team has completed all originally planned tasks and is satisfied with the outcome. Future updates could include expanded account details and payment gateway.
 
 

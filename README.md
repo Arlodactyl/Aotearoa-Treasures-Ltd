@@ -1,6 +1,6 @@
 
 ==Aotearoa Treasures Inventory Management System==
-#Project by Arleia, Bailey, Oskar
+# Project by Arleia, Bailey, Oskar
 
 # Overview
 The Aotearoa Treasures Inventory Management System is a C++ application developed for Aotearoa Treasures Ltd. It is designed to manage inventory and customer purchases across three store locations: Wellington CBD, Christchurch, and Auckland. The program features separate access modes for Admins and Customers, each with tailored functionality.
